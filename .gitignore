@@ -1,0 +1,246 @@
+# =============================================================================
+# .gitignore - Docker Lab / Notes Application
+# =============================================================================
+# Purpose: Exclude sensitive data, build artifacts, and generated files from Git
+# Security: Never commit secrets, credentials, or environment variables
+# =============================================================================
+
+# =============================================================================
+# SECRETS & ENVIRONMENT FILES (CRITICAL - NEVER COMMIT)
+# =============================================================================
+# Environment variables with sensitive data
+.env
+.env.*
+!.env.example
+*.env
+
+# AWS credentials and config
+.aws/
+aws-credentials.txt
+credentials.json
+
+# SSH keys
+*.pem
+*.key
+id_rsa*
+*.ppk
+
+# Secrets and sensitive configuration
+secrets/
+secret.*
+*secret*.json
+*credentials*.json
+
+# =============================================================================
+# TERRAFORM
+# =============================================================================
+# Terraform state files (may contain sensitive data)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+terraform.tfstate.d/
+
+# Terraform variable files (may contain secrets)
+*.tfvars
+*.tfvars.json
+!example.tfvars
+
+# Terraform plans
+*.tfplan
+*.tfplan.json
+
+# Terraform CLI configuration
+.terraform/
+.terraform.lock.hcl
+terraform.rc
+.terraformrc
+
+# Crash log files
+crash.log
+crash.*.log
+
+# =============================================================================
+# NODE.JS / NPM
+# =============================================================================
+# Dependencies
+node_modules/
+jspm_packages/
+bower_components/
+
+# Build output
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+
+# npm cache
+.npm
+.yarn/
+.pnp.*
+.yarn-integrity
+
+# Package manager locks (optional - include if you want consistency)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# TypeScript cache
+*.tsbuildinfo
+.tscache/
+
+# =============================================================================
+# DOCKER
+# =============================================================================
+# Docker Compose override files
+docker-compose.override.yml
+docker-compose.*.local.yml
+
+# Docker volumes (if mounted locally)
+volumes/
+data/
+postgres_data/
+
+# Docker build cache
+.dockerignore.local
+
+# =============================================================================
+# LOGS
+# =============================================================================
+# Application logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# OS logs
+*.log.*
+.DS_Store
+
+# =============================================================================
+# IDE / EDITOR
+# =============================================================================
+# VSCode / Cursor
+.vscode/
+.cursor/
+*.code-workspace
+.history/
+
+# JetBrains (IntelliJ, WebStorm, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# =============================================================================
+# OPERATING SYSTEMS
+# =============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# TESTING & COVERAGE
+# =============================================================================
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output/
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Test results
+test-results/
+junit.xml
+
+# =============================================================================
+# GITHUB ACTIONS / CI/CD
+# =============================================================================
+# Local Act (GitHub Actions local runner)
+.act/
+
+# CI/CD artifacts
+artifacts/
+
+# =============================================================================
+# MISCELLANEOUS
+# =============================================================================
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.cache
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Database dumps (unless intentionally committed)
+*.sql.gz
+*.dump
+backup/
+
+# SSL certificates (unless required for dev)
+*.crt
+*.cer
+*.pem
+*.p12
+*.pfx
+
+# =============================================================================
+# PROJECT-SPECIFIC
+# =============================================================================
+# EC2 bootstrap generated files
+scripts/.generated/
+
+# Local testing scripts
+local-*.sh
+test-local-*.sh
+
+# Documentation build output
+docs/_build/
+site/
