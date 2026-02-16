@@ -45,7 +45,7 @@ Configure these in: **Settings → Secrets and variables → Actions**
 ### AWS Configuration
 | Secret | Example Value | Description |
 |--------|---------------|-------------|
-| `AWS_REGION` | `us-east-1` | AWS region for deployment |
+| `AWS_REGION` | `eu-west-1` | AWS region for deployment |
 | `AWS_ROLE_ARN` | `arn:aws:iam::123456789:role/GitHubActionsRole` | IAM role for OIDC |
 | `EC2_INSTANCE_ID` | `i-0123456789abcdef` | EC2 instance ID (from Terraform output) |
 | `EC2_HOST` | `54.123.45.67` | EC2 public IP (from Terraform output) |

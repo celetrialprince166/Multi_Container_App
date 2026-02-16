@@ -1,0 +1,158 @@
+# =============================================================================
+# CI/CD Pipeline: Build → Test → Docker Build → Push to ECR → Deploy via SSH
+# =============================================================================
+# Stages: Checkout → Install/Build → Test → Docker Build → Push to ECR → Deploy
+# =============================================================================
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  # ===========================================================================
+  # Job 1: Build, Test, Docker Build, Push (runs on PR and push)
+  # ===========================================================================
+  build-and-push:
+    name: Build, Test & Push to ECR
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      ecr_registry: ${{ steps.login-ecr.outputs.registry }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # --- Install & Build Backend ---
+      - name: Install backend dependencies
+        run: cd backend && npm install
+
+      - name: Build backend
+        run: cd backend && npm run build
+
+      - name: Test backend
+        run: cd backend && npm run test
+
+      # --- Install & Build Frontend ---
+      - name: Install frontend dependencies
+        run: cd frontend && npm install
+
+      - name: Lint frontend
+        run: cd frontend && npm run lint
+        continue-on-error: true
+
+      - name: Build frontend
+        run: cd frontend && npm run build
+
+      # --- Docker Build & Push (only on push to main) ---
+      - name: Configure AWS credentials
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        # ECR registry derived from AWS account - no secret needed
+
+      - name: Set image tag
+        id: meta
+        run: |
+          echo "tags=latest" >> $GITHUB_OUTPUT
+          echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Build and push backend
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/notes-backend:latest ./backend
+          docker push ${{ steps.login-ecr.outputs.registry }}/notes-backend:latest
+
+      - name: Build and push frontend
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/notes-frontend:latest ./frontend
+          docker push ${{ steps.login-ecr.outputs.registry }}/notes-frontend:latest
+
+      - name: Build and push proxy
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/notes-proxy:latest ./nginx
+          docker push ${{ steps.login-ecr.outputs.registry }}/notes-proxy:latest
+
+  # ===========================================================================
+  # Job 2: Deploy to EC2 via SSH (only on push to main, after build succeeds)
+  # ===========================================================================
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      ECR_REGISTRY: ${{ needs.build-and-push.outputs.ecr_registry }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          ECR_REGISTRY=${{ needs.build-and-push.outputs.ecr_registry }}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_SSL=false
+          PROXY_PORT=80
+          NEXT_PUBLIC_API_URL=http://${{ secrets.EC2_HOST }}/api
+          EOF
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no .env docker-compose.ecr.yml ubuntu@${{ secrets.EC2_HOST }}:/opt/notes-app/
+
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} 'bash -s' << REMOTE_SCRIPT
+            set -e
+            cd /opt/notes-app
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ needs.build-and-push.outputs.ecr_registry }}
+            docker compose -f docker-compose.ecr.yml pull
+            docker compose -f docker-compose.ecr.yml down || true
+            docker compose -f docker-compose.ecr.yml up -d
+            docker system prune -af --volumes=false
+            sleep 15
+            docker compose -f docker-compose.ecr.yml ps
+          REMOTE_SCRIPT
+
+      - name: Verify deployment
+        run: |
+          sleep 10
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_HOST }}/ || true)
+          echo "Application HTTP response: $HTTP_CODE"
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "301" ] || [ "$HTTP_CODE" = "302" ]; then
+            echo "✓ Application is accessible"
+          else
+            echo "⚠ Application may still be starting (HTTP $HTTP_CODE)"
+          fi

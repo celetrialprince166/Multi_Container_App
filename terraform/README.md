@@ -29,7 +29,7 @@ terraform/
 Create a `terraform.tfvars` file (don't commit this!):
 
 ```hcl
-aws_region       = "us-east-1"
+aws_region       = "eu-west-1"
 environment      = "dev"
 instance_type    = "t3.small"
 key_name         = "your-ec2-key-pair-name"
@@ -132,7 +132,7 @@ terraform {
   backend "s3" {
     bucket         = "your-terraform-state-bucket"
     key            = "notes-app/terraform.tfstate"
-    region         = "us-east-1"
+    region         = "eu-west-1"
     encrypt        = true
     dynamodb_table = "terraform-state-lock"
   }
@@ -155,7 +155,7 @@ terraform {
 
 ## 💰 Estimated Costs
 
-| Resource | Monthly Cost (us-east-1) |
+| Resource | Monthly Cost (eu-west-1) |
 |----------|--------------------------|
 | EC2 t3.small (24/7) | ~$15.00 |
 | EBS gp3 (20 GB) | ~$1.60 |
