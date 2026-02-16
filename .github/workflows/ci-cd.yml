@@ -108,16 +108,27 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
-      ECR_REGISTRY: ${{ needs.build-and-push.outputs.ecr_registry }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set ECR registry
+        id: ecr
+        run: |
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          echo "registry=${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> $GITHUB_OUTPUT
+
       - name: Create .env file
         run: |
           cat > .env << EOF
-          ECR_REGISTRY=${{ needs.build-and-push.outputs.ecr_registry }}
+          ECR_REGISTRY=${{ steps.ecr.outputs.registry }}
           DB_USERNAME=${{ secrets.DB_USERNAME }}
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_NAME=${{ secrets.DB_NAME }}
@@ -140,7 +151,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} 'bash -s' << REMOTE_SCRIPT
             set -e
             cd /opt/notes-app
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ needs.build-and-push.outputs.ecr_registry }}
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.ecr.outputs.registry }}
             docker compose -f docker-compose.ecr.yml pull
             docker compose -f docker-compose.ecr.yml down || true
             docker compose -f docker-compose.ecr.yml up -d
