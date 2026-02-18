@@ -1,8 +1,21 @@
 # =============================================================================
-# Security Groups
+# Application Server Security Group
 # =============================================================================
-# Purpose: Define firewall rules for EC2 instance
-# Best Practice: Principle of least privilege
+# Scope: ONLY the SG resource + its OWN ingress/egress rules.
+#
+# Rules defined here:
+#   - HTTP  (80)  — public internet → Nginx proxy
+#   - HTTPS (443) — public internet → Nginx proxy (future TLS)
+#   - SSH   (22)  — operator IP     → emergency shell access
+#   - All outbound
+#
+# Rules NOT defined here (see sg_rules.tf):
+#   - Port 3001 from monitoring SG  → Prometheus scrapes /metrics
+#   - Port 9100 from monitoring SG  → Prometheus scrapes Node Exporter
+#
+# Why separate? Cross-SG rules depend on BOTH SGs existing first.
+# Keeping them in sg_rules.tf avoids circular dependency and makes
+# inter-service relationships explicit and easy to audit.
 # =============================================================================
 
 resource "aws_security_group" "notes_app" {
@@ -14,6 +27,7 @@ resource "aws_security_group" "notes_app" {
     local.common_tags,
     {
       Name = "${var.environment}-notes-app-sg"
+      Role = "application-server"
     }
   )
 
@@ -23,67 +37,62 @@ resource "aws_security_group" "notes_app" {
 }
 
 # =============================================================================
-# Ingress Rules (Inbound Traffic)
+# App Server — Inbound Rules
 # =============================================================================
 
-# HTTP - Port 80
+# HTTP — port 80
+# Public-facing: Nginx proxy receives all user traffic here.
 resource "aws_vpc_security_group_ingress_rule" "http" {
   security_group_id = aws_security_group.notes_app.id
-  description       = "Allow HTTP traffic from anywhere"
+  description       = "HTTP traffic from internet to Nginx proxy"
 
   from_port   = local.app_port
   to_port     = local.app_port
   ip_protocol = "tcp"
   cidr_ipv4   = join(",", var.allowed_http_cidr)
 
-  tags = {
-    Name = "http-inbound"
-  }
+  tags = { Name = "app-http-inbound" }
 }
 
-# HTTPS - Port 443 (for future SSL/TLS)
+# HTTPS — port 443
+# Reserved for future TLS termination at Nginx (cert not yet configured).
 resource "aws_vpc_security_group_ingress_rule" "https" {
   security_group_id = aws_security_group.notes_app.id
-  description       = "Allow HTTPS traffic from anywhere"
+  description       = "HTTPS traffic from internet to Nginx proxy (future TLS)"
 
   from_port   = local.https_port
   to_port     = local.https_port
   ip_protocol = "tcp"
   cidr_ipv4   = join(",", var.allowed_http_cidr)
 
-  tags = {
-    Name = "https-inbound"
-  }
+  tags = { Name = "app-https-inbound" }
 }
 
-# SSH - Port 22 (for emergency access)
+# SSH — port 22
+# Restricted to operator CIDR. Prefer SSM Session Manager for day-to-day access.
 resource "aws_vpc_security_group_ingress_rule" "ssh" {
   security_group_id = aws_security_group.notes_app.id
-  description       = "Allow SSH access from specified IPs"
+  description       = "SSH emergency access — restricted to operator IP"
 
   from_port   = local.ssh_port
   to_port     = local.ssh_port
   ip_protocol = "tcp"
   cidr_ipv4   = join(",", var.allowed_ssh_cidr)
 
-  tags = {
-    Name = "ssh-inbound"
-  }
+  tags = { Name = "app-ssh-inbound" }
 }
 
 # =============================================================================
-# Egress Rules (Outbound Traffic)
+# App Server — Outbound Rules
 # =============================================================================
 
-# Allow all outbound traffic
+# All outbound: needed for apt-get, Docker pulls from ECR, AWS API calls.
 resource "aws_vpc_security_group_egress_rule" "all_outbound" {
   security_group_id = aws_security_group.notes_app.id
-  description       = "Allow all outbound traffic"
+  description       = "Allow all outbound (ECR pulls, AWS API, package installs)"
 
-  ip_protocol = "-1" # All protocols
+  ip_protocol = "-1"
   cidr_ipv4   = "0.0.0.0/0"
 
-  tags = {
-    Name = "all-outbound"
-  }
+  tags = { Name = "app-all-outbound" }
 }

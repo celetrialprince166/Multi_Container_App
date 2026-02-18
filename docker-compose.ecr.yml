@@ -3,6 +3,11 @@
 # =============================================================================
 # Uses pre-built images from ECR instead of building locally.
 # Requires: ECR_REGISTRY in .env (e.g. 123456789.dkr.ecr.eu-west-1.amazonaws.com)
+#
+# Phase 2 additions:
+#   - awslogs logging driver on all app services → streams stdout/stderr to
+#     CloudWatch Logs group /notes-app/containers in real time.
+#   - node-exporter service → exposes OS metrics on :9100 for Prometheus to scrape.
 # =============================================================================
 
 services:
@@ -20,11 +25,31 @@ services:
       frontend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/nginx-health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost/nginx-health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    # ── CloudWatch log streaming ──────────────────────────────────────────────
+    # Docker's built-in awslogs driver intercepts every line written to
+    # stdout/stderr and ships it to CloudWatch Logs via PutLogEvents API.
+    # The EC2 IAM role must have logs:PutLogEvents + logs:CreateLogStream.
+    # Stream name pattern: proxy/notes-proxy/<container-id>
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: /notes-app/containers # CloudWatch log group
+        awslogs-region: ${AWS_REGION:-eu-west-1} # Must match your AWS region
+        awslogs-stream-prefix: proxy # Stream = prefix/container-name/id
+        awslogs-create-group: "true" # Auto-create group if missing
 
   frontend:
     image: ${ECR_REGISTRY}/notes-frontend:latest
@@ -39,11 +64,27 @@ services:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:3000",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15s
+    # Stream = frontend/notes-frontend/<container-id>
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: /notes-app/containers
+        awslogs-region: ${AWS_REGION:-eu-west-1}
+        awslogs-stream-prefix: frontend
+        awslogs-create-group: "true"
 
   backend:
     image: ${ECR_REGISTRY}/notes-backend:latest
@@ -65,11 +106,28 @@ services:
       database:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3001/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:3001/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    # Stream = backend/notes-backend/<container-id>
+    # This stream will contain NestJS logs AND is where /metrics is served from.
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: /notes-app/containers
+        awslogs-region: ${AWS_REGION:-eu-west-1}
+        awslogs-stream-prefix: backend
+        awslogs-create-group: "true"
 
   database:
     # Use ECR Public to avoid Docker Hub auth/rate limits
@@ -86,11 +144,67 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-dbadmin} -d ${DB_NAME:-notesdb}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USERNAME:-dbadmin} -d ${DB_NAME:-notesdb}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+    # Stream = database/notes-database/<container-id>
+    # Captures PostgreSQL startup messages, slow query warnings, and errors.
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: /notes-app/containers
+        awslogs-region: ${AWS_REGION:-eu-west-1}
+        awslogs-stream-prefix: database
+        awslogs-create-group: "true"
+
+  # ── Node Exporter ───────────────────────────────────────────────────────────
+  # Exposes OS-level metrics of the APP SERVER host machine on port 9100.
+  # Prometheus (on the Observations Server) scrapes this to get:
+  #   - CPU usage per core
+  #   - Memory available / used
+  #   - Disk I/O and filesystem usage
+  #   - Network bytes in/out
+  #   - System load averages
+  #
+  # Why host network mode?
+  #   Node Exporter needs access to the HOST's /proc and /sys filesystems to
+  #   read real hardware metrics. Bridge networking would give it the container's
+  #   view, not the host's. network_mode: host makes it see the actual EC2 metrics.
+  #
+  # Security: port 9100 is NOT opened to the internet — only the monitoring
+  # server's security group is allowed to reach it (enforced by AWS SG rules).
+  node-exporter:
+    image: public.ecr.aws/bitnami/node-exporter:1.8.2
+    container_name: notes-node-exporter
+    restart: unless-stopped
+    # Host network: required so Node Exporter reads the EC2 host's /proc + /sys
+    network_mode: host
+    pid: host
+    volumes:
+      # Read-only mounts of host filesystem paths Node Exporter needs
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      # Exclude noisy virtual filesystems from disk metrics
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    # Node Exporter logs to stdout — use json-file (default) since awslogs
+    # requires a network connection and node-exporter starts before networking
+    # is fully established. Its logs are low-value anyway.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   frontend:

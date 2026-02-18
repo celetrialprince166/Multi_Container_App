@@ -1,0 +1,27 @@
+apiVersion: 1
+
+# =============================================================================
+# Grafana Datasource Provisioning — Prometheus
+# =============================================================================
+# File: monitoring/grafana/provisioning/datasources/prometheus.yml
+#
+# Grafana reads this file on startup and automatically creates the Prometheus
+# datasource. No manual UI configuration needed.
+#
+# "proxy" access mode: Grafana backend makes requests to Prometheus.
+# This is correct — the browser never talks to Prometheus directly.
+# =============================================================================
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    # Docker service name — Grafana reaches Prometheus via Docker network
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      # Match Prometheus scrape/evaluation interval for accurate graphs
+      timeInterval: "15s"
+      # Enable exemplars (trace IDs linked to metrics — for future tracing)
+      exemplarTraceIdDestinations: []

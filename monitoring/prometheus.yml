@@ -1,0 +1,94 @@
+# =============================================================================
+# Prometheus Configuration
+# =============================================================================
+# File: monitoring/prometheus.yml
+# Deployed to: /opt/monitoring/prometheus.yml on the Observations Server
+#
+# This file is the SOURCE OF TRUTH for what Prometheus scrapes.
+# The monitoring_user_data.sh bootstrap script copies this file into place
+# and substitutes APP_SERVER_PRIVATE_IP with the actual EC2 private IP.
+#
+# To reload config without restarting Prometheus (after editing):
+#   curl -X POST http://localhost:9090/-/reload
+# =============================================================================
+
+global:
+  # How often Prometheus pulls metrics from each target
+  scrape_interval: 15s
+
+  # How often alert rules are evaluated
+  evaluation_interval: 15s
+
+  # Labels added to ALL time series and alerts produced by this server.
+  # Useful when federating multiple Prometheus instances into one.
+  external_labels:
+    environment: production
+    project: notes-app
+
+# =============================================================================
+# Alert Rules
+# =============================================================================
+rule_files:
+  - /etc/prometheus/alert_rules.yml
+
+# =============================================================================
+# Scrape Targets
+# =============================================================================
+scrape_configs:
+  # ── NestJS Backend /metrics ─────────────────────────────────────────────────
+  # Scrapes the custom application metrics exposed by @willsoto/nestjs-prometheus:
+  #   http_requests_total{method, route, status_code}
+  #   http_request_duration_seconds{method, route, status_code}
+  # Plus default Node.js runtime metrics (heap, GC, event loop, CPU).
+  #
+  # Port 3001 is the NestJS container port — NOT proxied by Nginx.
+  # Only reachable from the monitoring server via the sg_rules.tf SG rule.
+  - job_name: notes-backend
+    static_configs:
+      - targets:
+          - "APP_SERVER_PRIVATE_IP:3001"
+        labels:
+          instance: app-server
+          service: nestjs-backend
+    metrics_path: /metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # ── Node Exporter — App Server ───────────────────────────────────────────────
+  # OS-level metrics of the EC2 running the Notes app:
+  #   node_cpu_seconds_total, node_memory_MemAvailable_bytes,
+  #   node_disk_io_time_seconds_total, node_network_receive_bytes_total, etc.
+  - job_name: node-exporter-app
+    static_configs:
+      - targets:
+          - "APP_SERVER_PRIVATE_IP:9100"
+        labels:
+          instance: app-server
+          service: node-exporter
+    scrape_interval: 15s
+
+  # ── Node Exporter — Monitoring Server (self-monitoring) ─────────────────────
+  # Monitors the health of the Observations Server itself.
+  # Prometheus scrapes localhost so no SG rule is needed.
+  - job_name: node-exporter-monitoring
+    static_configs:
+      - targets:
+          - "localhost:9100"
+        labels:
+          instance: monitoring-server
+          service: node-exporter
+    scrape_interval: 15s
+
+  # ── Prometheus self-scrape ───────────────────────────────────────────────────
+  # Prometheus exposes its own operational metrics:
+  #   prometheus_tsdb_head_samples_appended_total (ingestion rate)
+  #   prometheus_target_scrape_pool_targets (number of active targets)
+  #   prometheus_rule_evaluation_duration_seconds (alert rule performance)
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - "localhost:9090"
+        labels:
+          instance: monitoring-server
+          service: prometheus
+    scrape_interval: 30s

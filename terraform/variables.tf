@@ -53,7 +53,7 @@ variable "instance_type" {
   default     = "t3.small"
 
   validation {
-    condition = can(regex("^t[2-3]\\.(nano|micro|small|medium|large)", var.instance_type))
+    condition     = can(regex("^t[2-3]\\.(nano|micro|small|medium|large)", var.instance_type))
     error_message = "Instance type must be a valid t2 or t3 instance type."
   }
 }
@@ -150,3 +150,20 @@ variable "additional_tags" {
   type        = map(string)
   default     = {}
 }
+
+# =============================================================================
+# Monitoring Configuration
+# =============================================================================
+
+variable "grafana_admin_password" {
+  description = "Admin password for Grafana UI (change before applying)"
+  type        = string
+  sensitive   = true
+  default     = "NotesApp@Grafana2024!"
+
+  validation {
+    condition     = length(var.grafana_admin_password) >= 8
+    error_message = "Grafana admin password must be at least 8 characters."
+  }
+}
+

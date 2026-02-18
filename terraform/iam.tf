@@ -49,11 +49,36 @@ resource "aws_iam_role_policy_attachment" "ec2_ecr" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-# Attach AWS managed policy for CloudWatch (optional)
+# Attach AWS managed policy for CloudWatch (always enabled for awslogs driver)
 resource "aws_iam_role_policy_attachment" "ec2_cloudwatch" {
-  count      = var.enable_monitoring ? 1 : 0
   role       = aws_iam_role.ec2_instance_role.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+# Inline policy: allow the awslogs Docker log driver to create log groups
+# and push log events to CloudWatch Logs.
+# CloudWatchAgentServerPolicy covers the agent; this covers the Docker driver.
+resource "aws_iam_role_policy" "ec2_cloudwatch_logs" {
+  name = "cloudwatch-logs-docker-driver"
+  role = aws_iam_role.ec2_instance_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "DockerAwslogsDriver"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams",
+          "logs:DescribeLogGroups"
+        ]
+        Resource = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/notes-app/*"
+      }
+    ]
+  })
 }
 
 # Instance Profile (required to attach role to EC2)

@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NotesModule } from './notes/notes.module';
+import { MetricsModule } from './metrics.module';
 
 // Validate required environment variables
 const requiredEnvVars = ['DB_HOST', 'DB_USERNAME', 'DB_PASSWORD', 'DB_NAME'];
@@ -44,8 +45,10 @@ console.log('Database configuration:', {
       logging: process.env.NODE_ENV !== 'production' ? true : ['error', 'warn'],
     }),
     NotesModule,
+    // Registers GET /metrics + HTTP request counter/histogram interceptor
+    MetricsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

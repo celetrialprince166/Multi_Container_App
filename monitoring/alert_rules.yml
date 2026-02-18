@@ -1,0 +1,149 @@
+# =============================================================================
+# Prometheus Alert Rules — Notes Application
+# =============================================================================
+# File: monitoring/alert_rules.yml
+# Deployed to: /opt/monitoring/alert_rules.yml on the Observations Server
+#
+# Prometheus evaluates these rules every 15s (evaluation_interval in prometheus.yml).
+# Firing alerts appear in:
+#   - Prometheus UI → /alerts
+#   - Grafana → Alerting panel (when Prometheus is configured as alert data source)
+#
+# Alert lifecycle:
+#   PENDING  → condition is true but "for" duration not yet elapsed
+#   FIRING   → condition has been true for the full "for" duration
+#   RESOLVED → condition is no longer true
+# =============================================================================
+
+groups:
+  # ============================================================================
+  # Application Health Alerts
+  # ============================================================================
+  - name: notes-app-health
+    rules:
+      # ── Backend Unreachable ──────────────────────────────────────────────────
+      # Fires when Prometheus cannot reach the /metrics endpoint at all.
+      # "up == 0" means the last scrape attempt failed (connection refused,
+      # timeout, or HTTP error). Fires after 30s to avoid flapping on restarts.
+      - alert: BackendDown
+        expr: up{job="notes-backend"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Notes backend is unreachable"
+          description: >
+            Prometheus cannot scrape {{ $labels.instance }}.
+            The NestJS container may have crashed or the port 3001 is not responding.
+            Check: ssh ubuntu@<app-ip> && docker ps && docker logs notes-backend
+
+      # ── High HTTP Error Rate ─────────────────────────────────────────────────
+      # Fires when >5% of requests over the last 5 minutes return 5xx status.
+      #
+      # Formula breakdown:
+      #   numerator:   rate of 5xx requests per second (averaged over 5m window)
+      #   denominator: rate of ALL requests per second (averaged over 5m window)
+      #   threshold:   > 0.05 (5%)
+      #
+      # "for: 1m" prevents false alarms from a single burst of errors.
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High HTTP 5xx error rate on Notes API (>5%)"
+          description: >
+            Error rate is {{ $value | humanizePercentage }} over the last 5 minutes.
+            Check backend logs: aws logs tail /notes-app/containers --filter-pattern ERROR --region eu-west-1
+
+      # ── High P95 Latency ─────────────────────────────────────────────────────
+      # Fires when the 95th percentile request duration exceeds 2 seconds.
+      # histogram_quantile() requires the _bucket series from the histogram.
+      # "for: 2m" gives time for a slow query to resolve before alerting.
+      - alert: HighP95Latency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 2
+        for: 2m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High P95 latency on Notes API (>2s)"
+          description: >
+            P95 request duration is {{ $value | humanizeDuration }}.
+            Possible causes: slow DB queries, resource exhaustion, or cold starts.
+
+  # ============================================================================
+  # Infrastructure Alerts
+  # ============================================================================
+  - name: notes-infra
+    rules:
+      # ── High CPU Usage ───────────────────────────────────────────────────────
+      # Fires when app server CPU usage exceeds 80% for 5 minutes.
+      #
+      # Formula: 100 - idle% = used%
+      # We average across all CPU cores (avg by instance) to get overall usage.
+      - alert: HighCPU
+        expr: |
+          (
+            100 - (
+              avg by (instance) (
+                rate(node_cpu_seconds_total{mode="idle", job="node-exporter-app"}[5m])
+              ) * 100
+            )
+          ) > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "App server CPU usage >80%"
+          description: >
+            CPU usage on {{ $labels.instance }} is {{ $value | humanize }}%.
+            Consider scaling up the instance type or investigating runaway processes.
+
+      # ── Low Available Memory ─────────────────────────────────────────────────
+      # Fires when available memory drops below 200 MB.
+      # node_memory_MemAvailable_bytes is the most accurate "free" metric
+      # (accounts for reclaimable cache, unlike MemFree).
+      - alert: LowMemory
+        expr: node_memory_MemAvailable_bytes{job="node-exporter-app"} < 200 * 1024 * 1024
+        for: 2m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "App server available memory <200MB"
+          description: >
+            Available memory on {{ $labels.instance }} is
+            {{ $value | humanize1024 }}B. Docker containers may be OOM-killed soon.
+
+      # ── Disk Space Low ───────────────────────────────────────────────────────
+      # Fires when the root filesystem is >85% full.
+      # Docker images and Postgres data can fill disk quickly.
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{job="node-exporter-app", mountpoint="/", fstype!="tmpfs"}
+            /
+            node_filesystem_size_bytes{job="node-exporter-app", mountpoint="/", fstype!="tmpfs"}
+          ) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "App server disk space <15% free"
+          description: >
+            Filesystem {{ $labels.mountpoint }} on {{ $labels.instance }} is
+            {{ $value | humanize }}% free. Run: docker system prune -f

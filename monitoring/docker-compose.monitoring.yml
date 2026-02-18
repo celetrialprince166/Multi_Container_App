@@ -1,0 +1,133 @@
+# =============================================================================
+# Monitoring Stack — Docker Compose
+# =============================================================================
+# File: monitoring/docker-compose.monitoring.yml
+# Deployed to: /opt/monitoring/ on the Observations Server
+#
+# Services:
+#   - prometheus    → time-series metrics database + alerting engine
+#   - grafana       → visualisation dashboards
+#   - node-exporter → OS metrics for the monitoring server itself
+#
+# Usage:
+#   Start:   docker compose -f docker-compose.monitoring.yml up -d
+#   Stop:    docker compose -f docker-compose.monitoring.yml down
+#   Logs:    docker compose -f docker-compose.monitoring.yml logs -f
+#   Reload Prometheus config (no restart):
+#            curl -X POST http://localhost:9090/-/reload
+#
+# Images: ECR Public Gallery — avoids Docker Hub rate limits on EC2.
+# =============================================================================
+
+services:
+  # ── Prometheus ──────────────────────────────────────────────────────────────
+  prometheus:
+    image: public.ecr.aws/bitnami/prometheus:2.51.2
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      # Config and alert rules (read-only — edit on host, reload via API)
+      - /opt/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - /opt/monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      # Persistent TSDB — survives container restarts and image upgrades
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d" # Keep 15 days of metrics
+      - "--web.enable-lifecycle" # Enable POST /-/reload
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    networks:
+      - monitoring
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9090/-/healthy",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── Grafana ─────────────────────────────────────────────────────────────────
+  grafana:
+    image: public.ecr.aws/bitnami/grafana:10.4.2
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Admin credentials — override GRAFANA_ADMIN_PASSWORD in .env on the host
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-NotesApp@Grafana2024!}
+      # Security hardening
+      - GF_USERS_ALLOW_SIGN_UP=false # No self-registration
+      - GF_ANALYTICS_REPORTING_ENABLED=false # No telemetry to Grafana Inc.
+      - GF_SECURITY_DISABLE_GRAVATAR=true
+      # Performance
+      - GF_DATABASE_WAL=true # SQLite WAL mode (better concurrency)
+    volumes:
+      # Persistent Grafana DB (dashboards saved in UI, users, alert state)
+      - grafana_data:/opt/bitnami/grafana/data
+      # Auto-provision Prometheus datasource on first boot
+      - /opt/monitoring/grafana/provisioning/datasources:/opt/bitnami/grafana/conf/provisioning/datasources:ro
+      # Auto-provision dashboard loader
+      - /opt/monitoring/grafana/provisioning/dashboards:/opt/bitnami/grafana/conf/provisioning/dashboards:ro
+      # Dashboard JSON files
+      - /opt/monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    networks:
+      - monitoring
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/api/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Node Exporter (monitoring server self-monitoring) ───────────────────────
+  # Exposes OS metrics of the Observations Server itself.
+  # Runs in host network mode to read real /proc and /sys.
+  node-exporter:
+    image: public.ecr.aws/bitnami/node-exporter:1.8.2
+    container_name: node-exporter-monitoring
+    restart: unless-stopped
+    network_mode: host
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+
+networks:
+  monitoring:
+    name: monitoring-network
+
+volumes:
+  prometheus_data:
+    name: prometheus-data
+  grafana_data:
+    name: grafana-data
