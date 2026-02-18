@@ -13,6 +13,7 @@ A production-ready full-stack Notes application deployed on AWS EC2 using Docker
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Jenkins CI/CD Pipeline](#jenkins-cicd-pipeline)
 - [Project Structure](#project-structure)
 - [Learning Outcomes](#learning-outcomes)
 - [Challenges & Solutions](#challenges--solutions)
@@ -50,6 +51,7 @@ This project was built to master end-to-end DevOps practices for containerized a
 - **PostgreSQL**: Relational database. Runs in an isolated network; only the backend can connect.
 - **Terraform**: Infrastructure-as-code for AWS. Provisions EC2, ECR, security groups, IAM roles, and TLS-generated SSH keys.
 - **GitHub Actions**: CI/CD automation. Runs tests, builds images, pushes to ECR, and deploys via SSH.
+- **Jenkins**: Self-hosted CI/CD server extending the pipeline with static analysis, security scanning, SonarCloud quality gates, Trivy image scanning, and Slack notifications.
 - **Amazon ECR**: Container registry for application images. Integrated with IAM and avoids Docker Hub rate limits.
 - **AWS EC2**: Compute host running Ubuntu 22.04 with Docker. Bootstraped via user data for Docker and SSM agent.
 
@@ -57,7 +59,7 @@ This project was built to master end-to-end DevOps practices for containerized a
 
 ## Architecture Diagram
 
-![Multi-Container Notes Application - AWS Architecture](images/image.png)
+![Multi-Container Notes Application - AWS Architecture](images/arch.png)
 
 ---
 
@@ -172,6 +174,137 @@ docker compose -f docker-compose.ecr.yml up -d
 
 ---
 
+## Jenkins CI/CD Pipeline
+
+In addition to the GitHub Actions workflow, this project includes an industry-standard **Declarative Jenkins Pipeline** (`Jenkinsfile`) that extends the CI/CD process with static analysis, security scanning, image vulnerability scanning, SonarCloud code quality gates, and automated deployment to EC2.
+
+### Pipeline Overview
+
+![Jenkins Pipeline Flow Graph](images/jenkinsflowgraph.png)
+
+| # | Stage | What it does | Branch |
+|---|-------|-------------|--------|
+| 1 | **Checkout** | Clones repo, captures short SHA, author, commit message | All |
+| 2 | **Static Code Analysis** | `tsc --noEmit` (backend) + `next lint` (frontend) — parallel | All |
+| 3 | **Dependency Security Audit** | `npm audit --audit-level=high` for both services — JSON report archived | All |
+| 4 | **Unit Tests & Coverage** | Skipped until Jest is configured; placeholder stage in place | All |
+| 5 | **SonarCloud Analysis** | `sonar-scanner` via `withSonarQubeEnv` — uploads to SonarCloud | All |
+| 6 | **Docker Build** | Builds `notes-backend`, `notes-frontend`, `notes-proxy` images tagged with short SHA | All |
+| 7 | **Image Vulnerability Scan** | Trivy scans all three images for CRITICAL CVEs; reports archived | All |
+| 8 | **Push to ECR** | Authenticates with AWS and pushes all images to Amazon ECR | `main` only |
+| 9 | **Deploy to EC2** | SCP `.env` + `docker-compose.ecr.yml` to EC2, SSH rolling restart | `main` only |
+| 10 | **Smoke Test** | `curl` with 5 retries — passes on HTTP 200/301/302 | `main` only |
+| Post | **Cleanup** | Removes local Docker images, cleans workspace | Always |
+
+---
+
+### Jenkins Setup
+
+#### Required Plugins
+
+Install via **Manage Jenkins → Plugins**:
+
+| Plugin | Purpose |
+|--------|---------|
+| Pipeline (workflow-aggregator) | Core declarative pipeline support |
+| Git | SCM checkout |
+| Docker Pipeline | `docker build` / `docker push` steps |
+| AWS Credentials | AWS key binding |
+| SonarQube Scanner | `withSonarQubeEnv` + `waitForQualityGate` |
+| SSH Agent | SSH key injection for EC2 deployment |
+| Slack Notification | `slackSend` build notifications |
+| Timestamper | Timestamps in console output |
+| Workspace Cleanup | `cleanWs()` post-build |
+| AnsiColor | Coloured console output |
+| HTML Publisher | Coverage report publishing |
+
+#### Required Credentials
+
+Add via **Manage Jenkins → Credentials → Global**:
+
+| Credential ID | Type | Value |
+|---|---|---|
+| `aws-access-key-id` | Secret Text | AWS Access Key ID |
+| `aws-secret-access-key` | Secret Text | AWS Secret Access Key |
+| `aws-region` | Secret Text | e.g. `eu-west-1` |
+| `ecr-registry` | Secret Text | `<account>.dkr.ecr.<region>.amazonaws.com` |
+| `ec2-host` | Secret Text | EC2 public IP or hostname |
+| `ec2-ssh-key` | SSH Username with private key | Username: `ubuntu`, Key: OpenSSH PEM format |
+| `db-username` | Secret Text | Postgres username |
+| `dbpassword` | Secret Text | Postgres password |
+| `db-name` | Secret Text | Postgres database name |
+| `sonarcloud-token` | Secret Text | SonarCloud user token |
+| `slack-token` | Secret Text | Slack Bot OAuth token |
+
+> [!IMPORTANT]
+> The SSH private key stored under `ec2-ssh-key` **must** be in OpenSSH format (beginning with `-----BEGIN OPENSSH PRIVATE KEY-----`). PuTTY `.ppk` format will cause a `Load key: invalid format` error.
+
+#### SonarCloud Server Configuration
+
+**Manage Jenkins → Configure System → SonarQube servers**:
+- Name: `SonarCloud` *(must match `withSonarQubeEnv('SonarCloud')` in the Jenkinsfile)*
+- URL: `https://sonarcloud.io`
+- Token: select the `sonarcloud-token` credential
+
+#### Creating the Pipeline Job
+
+1. **New Item → Pipeline**
+2. Pipeline → Definition: **Pipeline script from SCM**
+3. SCM: Git → `https://github.com/celetrialprince166/Multi_Container_App.git`
+4. Script Path: `Jenkinsfile`
+5. Branch: `*/main`
+
+---
+
+### Successful Pipeline Run — Evidence
+
+The pipeline completed all 10 stages successfully on build #15, triggered from commit `6246005` on the `main` branch.
+
+**Key log excerpts:**
+
+```
+✅ SonarCloud Analysis — EXECUTION SUCCESS (31.4s)
+✅ Docker Build — notes-backend, notes-frontend, notes-proxy built and tagged 6246005
+✅ Push to ECR — Login Succeeded; all 3 images pushed (backend, frontend, proxy)
+✅ Deploy to EC2 — docker compose up -d; all 4 containers healthy
+✅ Smoke Test — Attempt 1 — HTTP 200 → Smoke test passed
+✅ Cleanup — workspace and local images removed
+Finished: SUCCESS
+```
+
+**Smoke Test Result:**
+
+![Smoke Test — HTTP 200](images/smoketest.png)
+
+**Containers running on EC2 after deployment:**
+
+```
+NAME             IMAGE                        STATUS
+notes-backend    .../notes-backend:latest     Up 11 seconds (healthy)
+notes-database   postgres:15-alpine           Up 17 seconds (healthy)
+notes-frontend   .../notes-frontend:latest    Up 5 seconds (healthy)
+notes-proxy      .../notes-proxy:latest       Up < 1 second (health: starting)
+```
+
+---
+
+### How Jenkins Extends GitHub Actions
+
+| Capability | GitHub Actions | Jenkins Pipeline |
+|---|---|---|
+| Checkout + Build | ✅ | ✅ |
+| Docker Build + Push to ECR | ✅ | ✅ |
+| SSH Deploy to EC2 | ✅ | ✅ |
+| Static Code Analysis (TypeScript + ESLint) | ❌ | ✅ |
+| Dependency Security Audit (`npm audit`) | ❌ | ✅ |
+| SonarCloud Code Quality Gate | ❌ | ✅ |
+| Image Vulnerability Scan (Trivy) | ❌ | ✅ |
+| Smoke Test (HTTP health check) | ❌ | ✅ |
+| Slack Notifications | ❌ | ✅ |
+| Workspace Cleanup | ❌ | ✅ |
+
+---
+
 ## Project Structure
 
 ```
@@ -207,6 +340,7 @@ Multi_Container_App/
 │   ├── GITHUB_SECRETS_SETUP.md
 │   ├── RUNBOOK.md
 │   └── TERRAFORM_CI_CD_PLAN.md
+├── Jenkinsfile                 # Jenkins declarative pipeline (10 stages)
 ├── docker-compose.yml          # Local development
 ├── docker-compose.ecr.yml      # Production (ECR images)
 └── .env.example
@@ -264,6 +398,50 @@ Multi_Container_App/
 **Solution**: Used the Terraform TLS provider to generate an RSA 4096-bit key and register it with `aws_key_pair`. The private key is output as sensitive and added to GitHub Secrets once. No manual key creation is needed.
 
 **Learning**: TLS provider enables reproducible, version-controlled key generation within Terraform.
+
+---
+
+### Challenge 5: Jenkins SSH Key — "Load key: invalid format" (Jenkins)
+
+**Problem**: The `Deploy to EC2` stage failed immediately with `Load key: invalid format`. The `ec2-ssh-key` credential had been pasted in PuTTY `.ppk` format, which OpenSSH does not accept.
+
+**Solution**: Regenerated the key in OpenSSH format (`ssh-keygen -t rsa -b 4096 -m PEM`) and replaced the Jenkins credential with the correctly formatted key beginning with `-----BEGIN OPENSSH PRIVATE KEY-----`.
+
+**Learning**: Jenkins SSH credentials must be in OpenSSH PEM format. Always verify the key header before storing it in Jenkins; PuTTY keys are silently rejected at runtime, not at credential-save time.
+
+---
+
+### Challenge 6: Workspace Path with Spaces Breaking SCP/SSH (Jenkins)
+
+**Problem**: The Jenkins agent workspace was named `jenkins lab` (with a space). The `SSH_KEY` variable was interpolated unquoted into `scp` and `ssh` commands, causing the shell to split the path and produce `Identity file not found` errors.
+
+**Solution**: Wrapped `${SSH_KEY}` in double quotes in every `scp -i` and `ssh -i` invocation:
+```bash
+scp -o StrictHostKeyChecking=no -i "${SSH_KEY}" ...
+ssh -o StrictHostKeyChecking=no -i "${SSH_KEY}" ...
+```
+
+**Learning**: Always quote shell variables that may contain spaces, especially file paths derived from Jenkins workspace locations.
+
+---
+
+### Challenge 7: Deployment Stages Silently Skipped — Branch Detection (Jenkins)
+
+**Problem**: The `Push to ECR`, `Deploy to EC2`, and `Smoke Test` stages were skipped on every build even when running on `main`. The pipeline used `when { branch 'main' }`, which only works in Multibranch Pipeline jobs. In a standard Pipeline job, `env.BRANCH_NAME` is `null`.
+
+**Solution**: Extended the `when` condition to cover all ways Jenkins exposes the branch name:
+```groovy
+when {
+    anyOf {
+        branch 'main'
+        expression { env.GIT_BRANCH == 'origin/main' }
+        expression { env.GIT_BRANCH == 'refs/heads/main' }
+    }
+}
+```
+Added debug `echo` statements in the Checkout stage to print both `env.BRANCH_NAME` and `env.GIT_BRANCH`, which confirmed `env.GIT_BRANCH` was set to `origin/main`.
+
+**Learning**: `branch 'main'` only works in Multibranch Pipeline jobs. Standard Pipeline jobs must use `env.GIT_BRANCH` for branch-conditional logic.
 
 ---
 

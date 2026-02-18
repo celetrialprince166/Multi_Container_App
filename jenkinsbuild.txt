@@ -1,0 +1,1713 @@
+Started by user Ayiku Prince
+Obtained Jenkinsfile from git https://github.com/celetrialprince166/Multi_Container_App
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on agent in /home/jenkins/workspace/jenkins lab
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+Cloning the remote Git repository
+Avoid second fetch
+Checking out Revision 6246005f4c4467bf321de14e51229f2de7b9bde5 (refs/remotes/origin/main)
+Commit message: "fix: quote SSH_KEY path to handle spaces in workspace name"
+Cloning repository https://github.com/celetrialprince166/Multi_Container_App
+ > git init /home/jenkins/workspace/jenkins lab # timeout=10
+Fetching upstream changes from https://github.com/celetrialprince166/Multi_Container_App
+ > git --version # timeout=10
+ > git --version # 'git version 2.34.1'
+ > git fetch --tags --force --progress -- https://github.com/celetrialprince166/Multi_Container_App +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url https://github.com/celetrialprince166/Multi_Container_App # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 6246005f4c4467bf321de14e51229f2de7b9bde5 # timeout=10
+ > git rev-list --no-walk 6246005f4c4467bf321de14e51229f2de7b9bde5 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] timestamps
+[Pipeline] {
+[Pipeline] timeout
+[2026-02-18T13:23:41.690Z] Timeout set to expire in 1 hr 0 min
+[Pipeline] {
+[Pipeline] ansiColor
+[Pipeline] {
+[2026-02-18T13:23:41.913Z] 
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] echo
+[2026-02-18T13:23:42.196Z] 📥 Checking out source code...
+[Pipeline] checkout
+[2026-02-18T13:23:42.267Z] Selected Git installation does not exist. Using Default
+[2026-02-18T13:23:42.267Z] The recommended git tool is: NONE
+[2026-02-18T13:23:42.271Z] No credentials specified
+[2026-02-18T13:23:42.276Z] Fetching changes from the remote Git repository
+[2026-02-18T13:23:42.642Z] Checking out Revision 6246005f4c4467bf321de14e51229f2de7b9bde5 (refs/remotes/origin/main)
+[2026-02-18T13:23:42.665Z] Commit message: "fix: quote SSH_KEY path to handle spaces in workspace name"
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
+[2026-02-18T13:23:42.272Z]  > git rev-parse --resolve-git-dir /home/jenkins/workspace/jenkins lab/.git # timeout=10
+[2026-02-18T13:23:42.280Z]  > git config remote.origin.url https://github.com/celetrialprince166/Multi_Container_App # timeout=10
+[2026-02-18T13:23:42.285Z] Fetching upstream changes from https://github.com/celetrialprince166/Multi_Container_App
+[2026-02-18T13:23:42.285Z]  > git --version # timeout=10
+[2026-02-18T13:23:42.288Z]  > git --version # 'git version 2.34.1'
+[2026-02-18T13:23:42.288Z]  > git fetch --tags --force --progress -- https://github.com/celetrialprince166/Multi_Container_App +refs/heads/*:refs/remotes/origin/* # timeout=10
+[2026-02-18T13:23:42.637Z]  > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+[2026-02-18T13:23:42.644Z]  > git config core.sparsecheckout # timeout=10
+[2026-02-18T13:23:42.647Z]  > git checkout -f 6246005f4c4467bf321de14e51229f2de7b9bde5 # timeout=10
+[2026-02-18T13:23:43.276Z] + git rev-parse --short HEAD
+[Pipeline] sh
+[2026-02-18T13:23:43.715Z] + git log -1 --pretty=%an
+[Pipeline] sh
+[2026-02-18T13:23:44.128Z] + git log -1 --pretty=%s
+[Pipeline] echo
+[2026-02-18T13:23:44.333Z] Branch (env.BRANCH_NAME): null
+[Pipeline] echo
+[2026-02-18T13:23:44.404Z] Branch (env.GIT_BRANCH) : origin/main
+[Pipeline] echo
+[2026-02-18T13:23:44.471Z] Commit   : 6246005
+[Pipeline] echo
+[2026-02-18T13:23:44.542Z] Author   : celetrialprince166
+[Pipeline] echo
+[2026-02-18T13:23:44.610Z] Message  : fix: quote SSH_KEY path to handle spaces in workspace name
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Static Code Analysis)
+[Pipeline] parallel
+[Pipeline] { (Branch: Backend — TypeScript Check)
+[Pipeline] { (Branch: Frontend — Lint)
+[Pipeline] stage
+[Pipeline] { (Backend — TypeScript Check)
+[Pipeline] stage
+[Pipeline] { (Frontend — Lint)
+[Pipeline] dir
+[2026-02-18T13:23:45.676Z] Running in /home/jenkins/workspace/jenkins lab/backend
+[Pipeline] {
+[Pipeline] dir
+[2026-02-18T13:23:45.756Z] Running in /home/jenkins/workspace/jenkins lab/frontend
+[Pipeline] {
+[Pipeline] echo
+[2026-02-18T13:23:45.873Z] 🔍 Running TypeScript compiler check (backend)...
+[Pipeline] sh
+[Pipeline] echo
+[2026-02-18T13:23:46.017Z] 🔍 Running Next.js lint (frontend)...
+[Pipeline] sh
+[2026-02-18T13:23:46.212Z] + npm install
+[2026-02-18T13:23:46.371Z] + npm install
+[2026-02-18T13:24:01.124Z] npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+[2026-02-18T13:24:01.244Z] npm warn deprecated next@13.5.6: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/security-update-2025-12-11 for more details.
+[2026-02-18T13:24:01.244Z] 
+[2026-02-18T13:24:01.244Z] added 29 packages, and audited 30 packages in 13s
+[2026-02-18T13:24:01.244Z] 
+[2026-02-18T13:24:01.244Z] 3 packages are looking for funding
+[2026-02-18T13:24:01.244Z]   run `npm fund` for details
+[2026-02-18T13:24:01.244Z] 
+[2026-02-18T13:24:01.244Z] 1 critical severity vulnerability
+[2026-02-18T13:24:01.244Z] 
+[2026-02-18T13:24:01.244Z] To address all issues, run:
+[2026-02-18T13:24:01.244Z]   npm audit fix --force
+[2026-02-18T13:24:01.244Z] 
+[2026-02-18T13:24:01.244Z] Run `npm audit` for details.
+[Pipeline] sh
+[2026-02-18T13:24:01.656Z] + npm run lint
+[2026-02-18T13:24:01.918Z] 
+[2026-02-18T13:24:01.918Z] > notes-frontend@1.0.0 lint
+[2026-02-18T13:24:01.918Z] > next lint
+[2026-02-18T13:24:01.918Z] 
+[2026-02-18T13:24:03.070Z] 
+[2026-02-18T13:24:03.070Z] added 235 packages, and audited 236 packages in 17s
+[2026-02-18T13:24:03.070Z] 
+[2026-02-18T13:24:03.070Z] 57 packages are looking for funding
+[2026-02-18T13:24:03.070Z]   run `npm fund` for details
+[2026-02-18T13:24:03.070Z] 
+[2026-02-18T13:24:03.070Z] found 0 vulnerabilities
+[Pipeline] sh
+[2026-02-18T13:24:03.297Z] ? How would you like to configure ESLint? https://nextjs.org/docs/basic-features/eslint
+[2026-02-18T13:24:03.297Z] [?25l❯  Strict (recommended)
+[2026-02-18T13:24:03.297Z]    Base
+[2026-02-18T13:24:03.297Z]    Cancel ⚠ If you set up ESLint yourself, we recommend adding the Next.js ESLint plugin. See https://nextjs.org/docs/basic-features/eslint#migrating-existing-config
+[Pipeline] }
+[2026-02-18T13:24:03.450Z] + npx tsc --noEmit
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // parallel
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Dependency Security Audit)
+[Pipeline] parallel
+[Pipeline] { (Branch: Backend — npm audit)
+[Pipeline] { (Branch: Frontend — npm audit)
+[Pipeline] stage
+[Pipeline] { (Backend — npm audit)
+[Pipeline] stage
+[Pipeline] { (Frontend — npm audit)
+[Pipeline] dir
+[2026-02-18T13:24:09.181Z] Running in /home/jenkins/workspace/jenkins lab/backend
+[Pipeline] {
+[Pipeline] dir
+[2026-02-18T13:24:09.278Z] Running in /home/jenkins/workspace/jenkins lab/frontend
+[Pipeline] {
+[Pipeline] echo
+[2026-02-18T13:24:09.396Z] 🔒 Running npm audit (backend)...
+[Pipeline] sh
+[Pipeline] echo
+[2026-02-18T13:24:09.546Z] 🔒 Running npm audit (frontend)...
+[Pipeline] sh
+[2026-02-18T13:24:09.732Z] + npm audit --audit-level=high --json
+[2026-02-18T13:24:09.901Z] + npm audit --audit-level=high --json
+[2026-02-18T13:24:10.668Z] + npm audit --audit-level=high
+[2026-02-18T13:24:11.618Z] found 0 vulnerabilities
+[Pipeline] }
+[Pipeline] // dir
+Post stage
+[Pipeline] archiveArtifacts
+[2026-02-18T13:24:11.954Z] Archiving artifacts
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[2026-02-18T13:24:13.176Z] + true
+[2026-02-18T13:24:13.177Z] + npm audit --audit-level=high
+[2026-02-18T13:24:15.067Z] # npm audit report
+[2026-02-18T13:24:15.067Z] 
+[2026-02-18T13:24:15.067Z] next  0.9.9 - 15.5.9
+[2026-02-18T13:24:15.067Z] Severity: critical
+[2026-02-18T13:24:15.067Z] Next.js Server-Side Request Forgery in Server Actions - https://github.com/advisories/GHSA-fr5h-rqp8-mj6g
+[2026-02-18T13:24:15.067Z] Next.js Cache Poisoning - https://github.com/advisories/GHSA-gp8f-8m3g-qvj9
+[2026-02-18T13:24:15.067Z] Denial of Service condition in Next.js image optimization - https://github.com/advisories/GHSA-g77x-44xx-532m
+[2026-02-18T13:24:15.067Z] Next.js Allows a Denial of Service (DoS) with Server Actions - https://github.com/advisories/GHSA-7m27-7ghc-44w9
+[2026-02-18T13:24:15.067Z] Information exposure in Next.js dev server due to lack of origin verification - https://github.com/advisories/GHSA-3h52-269p-cp9r
+[2026-02-18T13:24:15.067Z] Next.js Affected by Cache Key Confusion for Image Optimization API Routes - https://github.com/advisories/GHSA-g5qg-72qw-gw5v
+[2026-02-18T13:24:15.067Z] Next.js authorization bypass vulnerability - https://github.com/advisories/GHSA-7gfc-8cq8-jh5f
+[2026-02-18T13:24:15.067Z] Next.js Improper Middleware Redirect Handling Leads to SSRF - https://github.com/advisories/GHSA-4342-x723-ch2f
+[2026-02-18T13:24:15.067Z] Next.js Content Injection Vulnerability for Image Optimization - https://github.com/advisories/GHSA-xv57-4mr9-wg8v
+[2026-02-18T13:24:15.067Z] Next.js Race Condition to Cache Poisoning - https://github.com/advisories/GHSA-qpjv-v59x-3qc4
+[2026-02-18T13:24:15.067Z] Authorization Bypass in Next.js Middleware - https://github.com/advisories/GHSA-f82v-jwr5-mffw
+[2026-02-18T13:24:15.067Z] Next Vulnerable to Denial of Service with Server Components - https://github.com/advisories/GHSA-mwv6-3258-q52c
+[2026-02-18T13:24:15.067Z] Next has a Denial of Service with Server Components - Incomplete Fix Follow-Up - https://github.com/advisories/GHSA-5j59-xgg2-r9c4
+[2026-02-18T13:24:15.067Z] Next.js self-hosted applications vulnerable to DoS via Image Optimizer remotePatterns configuration - https://github.com/advisories/GHSA-9g9p-9gw9-jx7f
+[2026-02-18T13:24:15.067Z] Next.js HTTP request deserialization can lead to DoS when using insecure React Server Components - https://github.com/advisories/GHSA-h25m-26qc-wcjf
+[2026-02-18T13:24:15.067Z] fix available via `npm audit fix --force`
+[2026-02-18T13:24:15.067Z] Will install next@13.5.11, which is outside the stated dependency range
+[2026-02-18T13:24:15.067Z] node_modules/next
+[2026-02-18T13:24:15.067Z] 
+[2026-02-18T13:24:15.067Z] 1 critical severity vulnerability
+[2026-02-18T13:24:15.067Z] 
+[2026-02-18T13:24:15.067Z] To address all issues, run:
+[2026-02-18T13:24:15.067Z]   npm audit fix --force
+[2026-02-18T13:24:15.067Z] + true
+[Pipeline] }
+[Pipeline] // dir
+Post stage
+[Pipeline] archiveArtifacts
+[2026-02-18T13:24:15.399Z] Archiving artifacts
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // parallel
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Unit Tests & Coverage)
+[Pipeline] echo
+[2026-02-18T13:24:16.338Z] ⏭️  Skipping tests — no test scripts configured in package.json yet.
+[Pipeline] echo
+[2026-02-18T13:24:16.395Z] To enable: add Jest + test scripts to backend/frontend package.json
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (SonarCloud Analysis)
+[Pipeline] echo
+[2026-02-18T13:24:16.829Z] 📊 Running SonarCloud analysis...
+[Pipeline] script
+[Pipeline] {
+[Pipeline] withCredentials
+[2026-02-18T13:24:17.047Z] Masking supported pattern matches of $SONAR_TOKEN
+[Pipeline] {
+[Pipeline] withSonarQubeEnv
+[2026-02-18T13:24:17.223Z] Injecting SonarQube environment variables using the configuration: SonarCloud
+[Pipeline] {
+[Pipeline] sh
+[2026-02-18T13:24:17.415Z] Warning: A secret was passed to "sh" using Groovy String interpolation, which is insecure.
+[2026-02-18T13:24:17.415Z] 		 Affected argument(s) used the following variable(s): [SONAR_TOKEN]
+[2026-02-18T13:24:17.415Z] 		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
+[2026-02-18T13:24:17.697Z] + npx sonar-scanner -Dsonar.organization=celetrialprince166 -Dsonar.projectKey=celetrialprince166 -Dsonar.projectName=Notes App -Dsonar.sources=backend/src,frontend/app -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/.next/**,**/coverage/** -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info -Dsonar.host.url=https://sonarcloud.io -Dsonar.token=****
+[2026-02-18T13:24:18.274Z] INFO: Scanner configuration file: /home/jenkins/.npm/_npx/4c634e31006915c7/node_modules/sonar-scanner/conf/sonar-scanner.properties
+[2026-02-18T13:24:18.274Z] INFO: Project root configuration file: NONE
+[2026-02-18T13:24:18.274Z] INFO: SonarQube Scanner 3.1.0.1141
+[2026-02-18T13:24:18.274Z] INFO: Java 17.0.18 Ubuntu (64-bit)
+[2026-02-18T13:24:18.274Z] INFO: Linux 6.8.0-1046-aws amd64
+[2026-02-18T13:24:18.532Z] INFO: User cache: /home/jenkins/.sonar/cache
+[2026-02-18T13:24:19.096Z] INFO: SonarQube server 12.17.0.2422
+[2026-02-18T13:24:19.096Z] INFO: Default locale: "en", source code encoding: "UTF-8" (analysis is platform dependent)
+[2026-02-18T13:24:19.354Z] 13:24:18,958 |-INFO in ch.qos.logback.classic.LoggerContext[default] - This is logback-classic version ?
+[2026-02-18T13:24:19.354Z] 13:24:18,959 |-INFO in ch.qos.logback.classic.util.ContextInitializer@11f0a5a1 - No custom configurators were discovered as a service.
+[2026-02-18T13:24:19.354Z] 13:24:18,959 |-INFO in ch.qos.logback.classic.util.ContextInitializer@11f0a5a1 - Trying to configure with ch.qos.logback.classic.joran.SerializedModelConfigurator
+[2026-02-18T13:24:19.354Z] 13:24:18,960 |-INFO in ch.qos.logback.classic.util.ContextInitializer@11f0a5a1 - Constructed configurator of type class ch.qos.logback.classic.joran.SerializedModelConfigurator
+[2026-02-18T13:24:19.354Z] 13:24:18,968 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback-test.scmo]
+[2026-02-18T13:24:19.354Z] 13:24:18,968 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback.scmo]
+[2026-02-18T13:24:19.354Z] 13:24:18,983 |-INFO in ch.qos.logback.classic.util.ContextInitializer@11f0a5a1 - ch.qos.logback.classic.joran.SerializedModelConfigurator.configure() call lasted 9 milliseconds. ExecutionStatus=INVOKE_NEXT_IF_ANY
+[2026-02-18T13:24:19.354Z] 13:24:18,983 |-INFO in ch.qos.logback.classic.util.ContextInitializer@11f0a5a1 - Trying to configure with ch.qos.logback.classic.util.DefaultJoranConfigurator
+[2026-02-18T13:24:19.354Z] 13:24:18,983 |-INFO in ch.qos.logback.classic.util.ContextInitializer@11f0a5a1 - Constructed configurator of type class ch.qos.logback.classic.util.DefaultJoranConfigurator
+[2026-02-18T13:24:19.354Z] 13:24:18,984 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback-test.xml]
+[2026-02-18T13:24:19.355Z] 13:24:18,993 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Found resource [logback.xml] at [jar:file:/home/jenkins/.sonar/cache/fc3c71634c354dcc21c2b7b49faa5c1b/sonarcloud-scanner-engine-12.17.0.2422-all.jar!/logback.xml]
+[2026-02-18T13:24:19.355Z] 13:24:19,001 |-INFO in ch.qos.logback.core.joran.spi.ConfigurationWatchList@10f7f7de - URL [jar:file:/home/jenkins/.sonar/cache/fc3c71634c354dcc21c2b7b49faa5c1b/sonarcloud-scanner-engine-12.17.0.2422-all.jar!/logback.xml] is not of type file
+[2026-02-18T13:24:19.355Z] 13:24:19,132 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.apache.commons.beanutils.converters] to WARN
+[2026-02-18T13:24:19.355Z] 13:24:19,132 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.eclipse.jgit.internal.storage.file] to INFO
+[2026-02-18T13:24:19.355Z] 13:24:19,132 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework] to INFO
+[2026-02-18T13:24:19.355Z] 13:24:19,132 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.context.annotation.AnnotationConfigApplicationContext] to ERROR
+[2026-02-18T13:24:19.355Z] 13:24:19,132 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.sonar.core.platform.PriorityBeanFactory] to INFO
+[2026-02-18T13:24:19.355Z] 13:24:19,132 |-INFO in ch.qos.logback.core.model.processor.DefaultProcessor@73a8da0f - End of configuration.
+[2026-02-18T13:24:19.355Z] 13:24:19,133 |-INFO in ch.qos.logback.classic.joran.JoranConfigurator@50dfbc58 - Registering current configuration as safe fallback point
+[2026-02-18T13:24:19.355Z] 13:24:19,133 |-INFO in ch.qos.logback.classic.util.ContextInitializer@11f0a5a1 - ch.qos.logback.classic.util.DefaultJoranConfigurator.configure() call lasted 150 milliseconds. ExecutionStatus=DO_NOT_INVOKE_NEXT_IF_ANY
+[2026-02-18T13:24:19.355Z] 13:24:19,198 |-WARN in Logger[org.sonar.batch.bootstrapper.EnvironmentConfig] - No appenders present in context [default] for logger [org.sonar.batch.bootstrapper.EnvironmentConfig].
+[2026-02-18T13:24:19.355Z] 13:24:19,210 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - Processing appender named [STDOUT]
+[2026-02-18T13:24:19.355Z] 13:24:19,210 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - About to instantiate appender of type [ch.qos.logback.core.ConsoleAppender]
+[2026-02-18T13:24:19.355Z] 13:24:19,218 |-INFO in ch.qos.logback.core.model.processor.ImplicitModelHandler - Assuming default type [ch.qos.logback.classic.encoder.PatternLayoutEncoder] for [encoder] property
+[2026-02-18T13:24:19.355Z] 13:24:19,246 |-INFO in ch.qos.logback.classic.model.processor.RootLoggerModelHandler - Setting level of ROOT logger to INFO
+[2026-02-18T13:24:19.355Z] 13:24:19,247 |-INFO in ch.qos.logback.core.model.processor.AppenderRefModelHandler - Attaching appender named [STDOUT] to Logger[ROOT]
+[2026-02-18T13:24:19.355Z] 13:24:19,247 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.apache.commons.beanutils.converters] to WARN
+[2026-02-18T13:24:19.355Z] 13:24:19,248 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [nl.altindag.ssl.util.CertificateUtils] to INFO
+[2026-02-18T13:24:19.355Z] 13:24:19,248 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.eclipse.jgit.internal.storage.file] to INFO
+[2026-02-18T13:24:19.355Z] 13:24:19,248 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework] to INFO
+[2026-02-18T13:24:19.355Z] 13:24:19,248 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.context.annotation.AnnotationConfigApplicationContext] to ERROR
+[2026-02-18T13:24:19.355Z] 13:24:19,248 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.sonar.core.platform.PriorityBeanFactory] to INFO
+[2026-02-18T13:24:19.355Z] 13:24:19,248 |-INFO in ch.qos.logback.core.model.processor.DefaultProcessor@4416d64f - End of configuration.
+[2026-02-18T13:24:19.355Z] 13:24:19,248 |-INFO in ch.qos.logback.classic.joran.JoranConfigurator@6bf08014 - Registering current configuration as safe fallback point
+[2026-02-18T13:24:19.355Z] 
+[2026-02-18T13:24:20.288Z] INFO: Load global settings
+[2026-02-18T13:24:20.854Z] INFO: Load global settings (done) | time=390ms
+[2026-02-18T13:24:20.854Z] INFO: Server id: 1BD809FA-AWHW8ct9-T_TB3XqouNu
+[2026-02-18T13:24:21.112Z] INFO: Loading required plugins
+[2026-02-18T13:24:21.112Z] INFO: Load plugins index
+[2026-02-18T13:24:21.112Z] INFO: Load plugins index (done) | time=60ms
+[2026-02-18T13:24:21.112Z] INFO: Load/download plugins
+[2026-02-18T13:24:21.369Z] INFO: Load/download plugins (done) | time=126ms
+[2026-02-18T13:24:21.369Z] INFO: Loaded core extensions: a3s, architecture, sca
+[2026-02-18T13:24:22.301Z] INFO: Process project properties
+[2026-02-18T13:24:22.301Z] INFO: Project key: celetrialprince166
+[2026-02-18T13:24:22.301Z] INFO: Base dir: /home/jenkins/workspace/jenkins lab
+[2026-02-18T13:24:22.301Z] INFO: Working dir: /home/jenkins/workspace/jenkins lab/.scannerwork
+[2026-02-18T13:24:22.301Z] INFO: Found an active CI vendor: 'Jenkins'
+[2026-02-18T13:24:22.301Z] INFO: Load project branches
+[2026-02-18T13:24:22.301Z] INFO: Load project branches (done) | time=251ms
+[2026-02-18T13:24:22.301Z] INFO: Load project settings for component key: 'celetrialprince166'
+[2026-02-18T13:24:22.559Z] INFO: Load project settings for component key: 'celetrialprince166' (done) | time=257ms
+[2026-02-18T13:24:22.559Z] INFO: Inferred api base url 'https://api.sonarcloud.io' from host url 'https://sonarcloud.io'.
+[2026-02-18T13:24:22.818Z] INFO: Inferred api base url 'https://api.sonarcloud.io' from host url 'https://sonarcloud.io'.
+[2026-02-18T13:24:23.075Z] INFO: Inferred api base url 'https://api.sonarcloud.io' from host url 'https://sonarcloud.io'.
+[2026-02-18T13:24:23.075Z] INFO: Check ALM binding of project 'celetrialprince166'
+[2026-02-18T13:24:23.331Z] INFO: Detected project binding: NOT_BOUND
+[2026-02-18T13:24:23.331Z] INFO: Check ALM binding of project 'celetrialprince166' (done) | time=289ms
+[2026-02-18T13:24:23.331Z] INFO: Load project pull requests
+[2026-02-18T13:24:23.331Z] INFO: Load project pull requests (done) | time=69ms
+[2026-02-18T13:24:23.331Z] INFO: Load branch configuration
+[2026-02-18T13:24:23.331Z] INFO: Load branch configuration (done) | time=1ms
+[2026-02-18T13:24:23.331Z] INFO: Load quality profiles
+[2026-02-18T13:24:23.893Z] INFO: Load quality profiles (done) | time=364ms
+[2026-02-18T13:24:23.893Z] INFO: Inferred api base url 'https://api.sonarcloud.io' from host url 'https://sonarcloud.io'.
+[2026-02-18T13:24:23.893Z] INFO: Create analysis
+[2026-02-18T13:24:24.151Z] INFO: Create analysis (done) | time=226ms
+[2026-02-18T13:24:24.151Z] INFO: Inferred api base url 'https://api.sonarcloud.io' from host url 'https://sonarcloud.io'.
+[2026-02-18T13:24:24.151Z] INFO: Inferred api base url 'https://api.sonarcloud.io' from host url 'https://sonarcloud.io'.
+[2026-02-18T13:24:24.151Z] INFO: Load active rules
+[2026-02-18T13:24:25.084Z] INFO: Load active rules (done) | time=729ms
+[2026-02-18T13:24:25.084Z] INFO: Organization key: celetrialprince166
+[2026-02-18T13:24:25.084Z] INFO: Preprocessing files...
+[2026-02-18T13:24:25.084Z] INFO: 2 languages detected in 15 preprocessed files (done) | time=179ms
+[2026-02-18T13:24:25.084Z] INFO: 0 files ignored because of inclusion/exclusion patterns
+[2026-02-18T13:24:25.084Z] INFO: 0 files ignored because of scm ignore settings
+[2026-02-18T13:24:25.084Z] INFO: Loading plugins for detected languages
+[2026-02-18T13:24:25.084Z] INFO: Load/download plugins
+[2026-02-18T13:24:25.343Z] INFO: Load/download plugins (done) | time=54ms
+[2026-02-18T13:24:25.599Z] INFO: Load project repositories
+[2026-02-18T13:24:25.854Z] INFO: Load project repositories (done) | time=98ms
+[2026-02-18T13:24:25.854Z] INFO: Indexing files...
+[2026-02-18T13:24:25.854Z] INFO: Project configuration:
+[2026-02-18T13:24:25.854Z] INFO:   Excluded sources: **/node_modules/**, **/dist/**, **/.next/**, **/coverage/**, **/build-wrapper-dump.json
+[2026-02-18T13:24:25.854Z] INFO: 15 files indexed (done) | time=10ms
+[2026-02-18T13:24:25.854Z] INFO: Quality profile for css: Sonar way
+[2026-02-18T13:24:25.854Z] INFO: Quality profile for ts: Sonar way
+[2026-02-18T13:24:25.855Z] INFO: ------------- Run sensors on module Notes App
+[2026-02-18T13:24:25.855Z] INFO: Load metrics repository
+[2026-02-18T13:24:25.855Z] INFO: Load metrics repository (done) | time=71ms
+[2026-02-18T13:24:25.855Z] INFO: Sensor cache enabled
+[2026-02-18T13:24:25.855Z] INFO: Inferred api base url 'https://api.sonarcloud.io' from host url 'https://sonarcloud.io'.
+[2026-02-18T13:24:25.855Z] INFO: Load sensor cache
+[2026-02-18T13:24:26.417Z] INFO: Load sensor cache (45 KB) | time=426ms
+[2026-02-18T13:24:26.417Z] INFO: Inferred api base url 'https://api.sonarcloud.io' from host url 'https://sonarcloud.io'.
+[2026-02-18T13:24:26.417Z] INFO: Inferred api base url 'https://api.sonarcloud.io' from host url 'https://sonarcloud.io'.
+[2026-02-18T13:24:27.792Z] INFO: Sensor JasminFileCollectorSensor [jasmin]
+[2026-02-18T13:24:27.792Z] INFO: Sensor JasminFileCollectorSensor [jasmin] (done) | time=1ms
+[2026-02-18T13:24:27.792Z] INFO: Sensor IaC hadolint report Sensor [iac]
+[2026-02-18T13:24:27.792Z] INFO: Sensor IaC hadolint report Sensor [iac] (done) | time=0ms
+[2026-02-18T13:24:27.792Z] INFO: Sensor Java Config Sensor [iac]
+[2026-02-18T13:24:27.792Z] INFO: There are no files to be analyzed for the Java language
+[2026-02-18T13:24:27.792Z] INFO: Sensor Java Config Sensor [iac] (done) | time=10ms
+[2026-02-18T13:24:27.792Z] INFO: Sensor IaC Docker Sensor [iac]
+[2026-02-18T13:24:27.792Z] INFO: There are no files to be analyzed for the Docker language
+[2026-02-18T13:24:27.792Z] INFO: Sensor IaC Docker Sensor [iac] (done) | time=16ms
+[2026-02-18T13:24:27.792Z] INFO: Sensor IaC GitHub Actions Sensor [iac]
+[2026-02-18T13:24:27.792Z] INFO: There are no files to be analyzed for the GitHub Actions language
+[2026-02-18T13:24:27.792Z] INFO: Sensor IaC GitHub Actions Sensor [iac] (done) | time=0ms
+[2026-02-18T13:24:27.792Z] INFO: Sensor IaC actionlint report Sensor [iac]
+[2026-02-18T13:24:27.792Z] INFO: Sensor IaC actionlint report Sensor [iac] (done) | time=0ms
+[2026-02-18T13:24:27.792Z] INFO: Sensor IaC Shell Sensor [iac]
+[2026-02-18T13:24:27.792Z] INFO: There are no files to be analyzed for the Shell language
+[2026-02-18T13:24:27.792Z] INFO: Sensor IaC Shell Sensor [iac] (done) | time=0ms
+[2026-02-18T13:24:27.792Z] INFO: Sensor JavaScript/TypeScript analysis [javascript]
+[2026-02-18T13:24:28.050Z] INFO: Detected os: Linux arch: amd64 alpine: false. Platform: LINUX_X64
+[2026-02-18T13:24:28.050Z] INFO: Deploy location /home/jenkins/.sonar/js/node-runtime, tagetRuntime: /home/jenkins/.sonar/js/node-runtime/node,  version: /home/jenkins/.sonar/js/node-runtime/version.txt
+[2026-02-18T13:24:28.050Z] INFO: Using embedded Node.js runtime.
+[2026-02-18T13:24:28.050Z] INFO: Using Node.js executable: '/home/jenkins/.sonar/js/node-runtime/node'.
+[2026-02-18T13:24:31.330Z] INFO: Memory configuration: OS (3836 MB), Node.js (2110 MB).
+[2026-02-18T13:24:31.330Z] INFO: WebSocket client connected on /ws
+[2026-02-18T13:24:31.330Z] INFO: Plugin version: [11.8.0.37897]
+[2026-02-18T13:24:43.530Z] INFO: Found 2 tsconfig.json file(s): [/home/jenkins/workspace/jenkins lab/backend/tsconfig.json, /home/jenkins/workspace/jenkins lab/frontend/tsconfig.json]
+[2026-02-18T13:24:43.530Z] INFO: 14 source files to be analyzed
+[2026-02-18T13:24:43.530Z] INFO: Creating TypeScript program
+[2026-02-18T13:24:43.530Z] INFO: TypeScript(5.9.3) configuration file /home/jenkins/workspace/jenkins lab/backend/tsconfig.json
+[2026-02-18T13:24:43.530Z] INFO: Creating TypeScript program
+[2026-02-18T13:24:43.530Z] INFO: TypeScript(5.9.3) configuration file /home/jenkins/workspace/jenkins lab/frontend/tsconfig.json
+[2026-02-18T13:24:43.530Z] INFO: 14/14 source files have been analyzed
+[2026-02-18T13:24:43.530Z] INFO: JasminAstConsumer done
+[2026-02-18T13:24:43.530Z] INFO: Hit the cache for 0 out of 14
+[2026-02-18T13:24:43.530Z] INFO: Miss the cache for 14 out of 14: ANALYSIS_MODE_INELIGIBLE [14/14]
+[2026-02-18T13:24:43.530Z] INFO: Sensor JavaScript/TypeScript analysis [javascript] (done) | time=14754ms
+[2026-02-18T13:24:43.530Z] INFO: Sensor CSS Rules [javascript]
+[2026-02-18T13:24:43.530Z] INFO: 1 source file to be analyzed
+[2026-02-18T13:24:43.530Z] INFO: 1/1 source file has been analyzed
+[2026-02-18T13:24:43.530Z] INFO: Hit the cache for 0 out of 0
+[2026-02-18T13:24:43.530Z] INFO: Miss the cache for 0 out of 0
+[2026-02-18T13:24:43.530Z] INFO: Sensor CSS Rules [javascript] (done) | time=234ms
+[2026-02-18T13:24:43.530Z] INFO: Sensor JavaScript/TypeScript Coverage [javascript]
+[2026-02-18T13:24:43.530Z] INFO: No LCOV files were found using backend/coverage/lcov.info
+[2026-02-18T13:24:43.530Z] INFO: No LCOV files were found using frontend/coverage/lcov.info
+[2026-02-18T13:24:43.530Z] WARN: No coverage information will be saved because all LCOV files cannot be found.
+[2026-02-18T13:24:43.530Z] INFO: Sensor JavaScript/TypeScript Coverage [javascript] (done) | time=602ms
+[2026-02-18T13:24:43.530Z] INFO: Sensor CSS Metrics [javascript]
+[2026-02-18T13:24:43.530Z] INFO: Sensor CSS Metrics [javascript] (done) | time=56ms
+[2026-02-18T13:24:43.530Z] INFO: Sensor EnterpriseTextAndSecretsSensor [textenterprise]
+[2026-02-18T13:24:43.530Z] INFO: Available processors: 2
+[2026-02-18T13:24:43.530Z] INFO: Using 2 threads for analysis.
+[2026-02-18T13:24:44.101Z] INFO: The property "sonar.tests" is not set. To improve the analysis accuracy, we categorize a file as a test file if any of the following is true:
+[2026-02-18T13:24:44.101Z]   * The filename starts with "test"
+[2026-02-18T13:24:44.101Z]   * The filename contains "test." or "tests."
+[2026-02-18T13:24:44.101Z]   * Any directory in the file path is named: "doc", "docs", "test", "tests", "mock" or "mocks"
+[2026-02-18T13:24:44.101Z]   * Any directory in the file path has a name ending in "test" or "tests"
+[2026-02-18T13:24:44.101Z] 
+[2026-02-18T13:24:44.101Z] INFO: Start fetching files for the text and secrets analysis
+[2026-02-18T13:24:44.101Z] INFO: Using Git CLI to retrieve dirty files
+[2026-02-18T13:24:44.101Z] INFO: Retrieving language associated files and files included via "sonar.text.inclusions" that are tracked by git
+[2026-02-18T13:24:44.101Z] INFO: Starting the text and secrets analysis
+[2026-02-18T13:24:44.101Z] INFO: 15 source files to be analyzed for the text and secrets analysis
+[2026-02-18T13:24:44.362Z] INFO: 15/15 source files have been analyzed for the text and secrets analysis
+[2026-02-18T13:24:44.362Z] INFO: Start fetching files for the binary file analysis
+[2026-02-18T13:24:44.362Z] INFO: There are no files to be analyzed for the binary file analysis
+[2026-02-18T13:24:44.362Z] INFO: Sensor EnterpriseTextAndSecretsSensor [textenterprise] (done) | time=1024ms
+[2026-02-18T13:24:44.362Z] INFO: ------------- Run sensors on project
+[2026-02-18T13:24:44.620Z] INFO: Sensor JsSecuritySensorV2 [jasmin]
+[2026-02-18T13:24:44.620Z] INFO: 14 file(s) will be analysed by SonarJasmin.
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:   7% (1/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  14% (2/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  21% (3/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  28% (4/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  35% (5/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  42% (6/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  50% (7/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  57% (8/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  64% (9/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  71% (10/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  78% (11/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  85% (12/14 files)
+[2026-02-18T13:24:49.896Z] INFO: Analysis progress:  92% (13/14 files)
+[2026-02-18T13:24:50.155Z] INFO: Sensor JsSecuritySensorV2 [jasmin] (done) | time=5468ms
+[2026-02-18T13:24:50.155Z] INFO: Sensor TsArchitectureSensor [architecture]
+[2026-02-18T13:24:50.155Z] INFO: Found 1 potential Udg file location(s) for "ts" in "/home/jenkins/workspace/jenkins lab/.scannerwork"
+[2026-02-18T13:24:50.155Z] INFO: - /home/jenkins/workspace/jenkins lab/.scannerwork/architecture/ts
+[2026-02-18T13:24:50.155Z] INFO: Architecture analysis is enabled with the following features: legacy
+[2026-02-18T13:24:50.155Z] INFO: * Protobuf reading starting | memory total=217 | free=148 | used=68 (MB)
+[2026-02-18T13:24:50.155Z] INFO: * Reading SonarArchitecture UDG data from directory "/home/jenkins/workspace/jenkins lab/.scannerwork/architecture/ts"
+[2026-02-18T13:24:50.414Z] INFO: * Files successfully loaded: "14" out of "14"
+[2026-02-18T13:24:50.414Z] INFO: * Purging externals (components not scanned) from graphs
+[2026-02-18T13:24:50.414Z] INFO: * Purging excluded nodes from graphs
+[2026-02-18T13:24:50.414Z] INFO: * Protobuf reading complete | memory total=217 | free=136 | used=80 (MB)
+[2026-02-18T13:24:50.414Z] INFO: * Build architecture.graph.ts.file_graph.default_perspective hierarchy graph complete (filtered=false) | memory total=217 | free=133 | used=83 (MB)
+[2026-02-18T13:24:50.414Z] INFO: Sensor TsArchitectureSensor [architecture] (done) | time=423ms
+[2026-02-18T13:24:50.414Z] INFO: Sensor Zero Coverage Sensor
+[2026-02-18T13:24:50.414Z] INFO: Sensor Zero Coverage Sensor (done) | time=14ms
+[2026-02-18T13:24:50.671Z] INFO: ------------- Gather SCA dependencies on project
+[2026-02-18T13:24:50.671Z] INFO: Checking if SCA is enabled for organization celetrialprince166
+[2026-02-18T13:24:51.243Z] INFO: Dependency analysis skipped
+[2026-02-18T13:24:51.243Z] INFO: CPD Executor 1 file had no CPD blocks
+[2026-02-18T13:24:51.243Z] INFO: CPD Executor Calculating CPD for 13 files
+[2026-02-18T13:24:51.243Z] INFO: CPD Executor CPD calculation finished (done) | time=20ms
+[2026-02-18T13:24:51.243Z] INFO: SCM Publisher SCM provider for this project is: git
+[2026-02-18T13:24:51.243Z] INFO: SCM Publisher 15 source files to be analyzed
+[2026-02-18T13:24:51.808Z] INFO: SCM Publisher 15/15 source files have been analyzed (done) | time=535ms
+[2026-02-18T13:24:51.808Z] INFO: Analysis report generated in 178ms, dir size=385 KB
+[2026-02-18T13:24:52.064Z] INFO: Analysis report compressed in 66ms, zip size=100 KB
+[2026-02-18T13:24:52.320Z] INFO: Analysis report uploaded in 292ms
+[2026-02-18T13:24:52.320Z] INFO: ANALYSIS SUCCESSFUL, you can find the results at: https://sonarcloud.io/dashboard?id=celetrialprince166
+[2026-02-18T13:24:52.320Z] INFO: Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+[2026-02-18T13:24:52.320Z] INFO: More about the report processing at https://sonarcloud.io/api/ce/task?id=AZxw7MjsyVxVPc6lTxMv
+[2026-02-18T13:24:52.320Z] INFO: ------------- Upload SCA dependency files
+[2026-02-18T13:24:52.880Z] INFO: Sensor cache published successfully
+[2026-02-18T13:24:52.880Z] INFO: Analysis total time: 31.398 s
+[2026-02-18T13:24:52.880Z] INFO: ------------------------------------------------------------------------
+[2026-02-18T13:24:52.880Z] INFO: EXECUTION SUCCESS
+[2026-02-18T13:24:52.880Z] INFO: ------------------------------------------------------------------------
+[2026-02-18T13:24:52.880Z] INFO: Total time: 34.529s
+[2026-02-18T13:24:52.880Z] INFO: Final Memory: 31M/110M
+[2026-02-18T13:24:52.880Z] INFO: ------------------------------------------------------------------------
+[Pipeline] }
+[Pipeline] // withSonarQubeEnv
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (SonarCloud Quality Gate)
+[Pipeline] echo
+[2026-02-18T13:24:54.674Z] 🚦 Waiting for SonarCloud Quality Gate result...
+[Pipeline] script
+[Pipeline] {
+[Pipeline] timeout
+[2026-02-18T13:24:54.890Z] Timeout set to expire in 5 min 0 sec
+[Pipeline] {
+[Pipeline] waitForQualityGate
+[2026-02-18T13:24:55.045Z] Checking status of SonarQube task 'AZxw7MjsyVxVPc6lTxMv' on server 'SonarCloud'
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] echo
+[2026-02-18T13:24:55.433Z] ⚠️ Quality Gate check skipped: Error 404 on  https://sonarcloud.io/api/ce/task?id=AZxw7MjsyVxVPc6lTxMv : {"errors":[{"msg":"Project doesn\u0027t exist"}]}
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Docker Build)
+[Pipeline] echo
+[2026-02-18T13:24:56.039Z] 🐳 Building Docker images (tag: 6246005)...
+[Pipeline] withCredentials
+[2026-02-18T13:24:56.125Z] Masking supported pattern matches of $ECR_REGISTRY
+[Pipeline] {
+[Pipeline] sh
+[2026-02-18T13:24:56.336Z] Warning: A secret was passed to "sh" using Groovy String interpolation, which is insecure.
+[2026-02-18T13:24:56.336Z] 		 Affected argument(s) used the following variable(s): [ECR_REGISTRY]
+[2026-02-18T13:24:56.336Z] 		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
+[2026-02-18T13:24:56.608Z] + docker build --label git.commit=6246005 --label build.number=15 --label build.url=http://jenkins-dev-alb-1488972025.eu-west-1.elb.amazonaws.com/job/jenkins%20lab/15/ -t ****/notes-backend:6246005 -t ****/notes-backend:latest ./backend
+[2026-02-18T13:24:56.864Z] #0 building with "default" instance using docker driver
+[2026-02-18T13:24:56.864Z] 
+[2026-02-18T13:24:56.864Z] #1 [internal] load build definition from Dockerfile
+[2026-02-18T13:24:56.864Z] #1 transferring dockerfile: 2.47kB done
+[2026-02-18T13:24:56.864Z] #1 DONE 0.0s
+[2026-02-18T13:24:56.864Z] 
+[2026-02-18T13:24:56.864Z] #2 [internal] load metadata for docker.io/library/node:20-alpine
+[2026-02-18T13:24:57.122Z] #2 DONE 0.5s
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #3 [internal] load .dockerignore
+[2026-02-18T13:24:57.379Z] #3 transferring context: 499B done
+[2026-02-18T13:24:57.379Z] #3 DONE 0.0s
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #4 [builder 1/7] FROM docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8
+[2026-02-18T13:24:57.379Z] #4 resolve docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8 0.0s done
+[2026-02-18T13:24:57.379Z] #4 DONE 0.0s
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #5 [internal] load build context
+[2026-02-18T13:24:57.379Z] #5 transferring context: 115.25kB 0.0s done
+[2026-02-18T13:24:57.379Z] #5 DONE 0.0s
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #6 [production 4/8] WORKDIR /app
+[2026-02-18T13:24:57.379Z] #6 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #7 [production 2/8] RUN apk add --no-cache wget
+[2026-02-18T13:24:57.379Z] #7 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #8 [builder 3/7] COPY package*.json ./
+[2026-02-18T13:24:57.379Z] #8 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #9 [builder 7/7] RUN npm run build
+[2026-02-18T13:24:57.379Z] #9 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #10 [builder 4/7] COPY tsconfig.json ./
+[2026-02-18T13:24:57.379Z] #10 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #11 [production 7/8] COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
+[2026-02-18T13:24:57.379Z] #11 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #12 [production 6/8] COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+[2026-02-18T13:24:57.379Z] #12 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #13 [builder 6/7] COPY src/ ./src/
+[2026-02-18T13:24:57.379Z] #13 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #14 [deps 4/4] RUN npm install --omit=dev && npm cache clean --force
+[2026-02-18T13:24:57.379Z] #14 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #15 [builder 2/7] WORKDIR /app
+[2026-02-18T13:24:57.379Z] #15 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #16 [builder 5/7] RUN npm install
+[2026-02-18T13:24:57.379Z] #16 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #17 [production 3/8] RUN addgroup -g 1001 -S nodejs &&     adduser -S nestjs -u 1001 -G nodejs
+[2026-02-18T13:24:57.379Z] #17 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #18 [production 5/8] COPY --from=deps --chown=nestjs:nodejs /app/node_modules ./node_modules
+[2026-02-18T13:24:57.379Z] #18 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #19 [production 8/8] RUN ls -la /app/dist/ && test -f /app/dist/main.js
+[2026-02-18T13:24:57.379Z] #19 CACHED
+[2026-02-18T13:24:57.379Z] 
+[2026-02-18T13:24:57.379Z] #20 exporting to image
+[2026-02-18T13:24:57.379Z] #20 exporting layers done
+[2026-02-18T13:24:57.379Z] #20 exporting manifest sha256:c9be467a9d3d0448050fb85b8bcd13df9b6d724685b0a9d06e0c27d33ec14833 done
+[2026-02-18T13:24:57.379Z] #20 exporting config sha256:ef6e0f300fe442715909d1e90c0c20ce7d17dbab8f8c2ee06f96198a38c1bbd4 done
+[2026-02-18T13:24:57.379Z] #20 exporting attestation manifest sha256:675b161fa697c16b6aa6341700aaf4b66678c86818bee4242bea1e1db169c989 0.0s done
+[2026-02-18T13:24:57.379Z] #20 exporting manifest list sha256:7f7837a7d385c2ec4691680307686c6bb2ee5d522c716fa556cfc4f61e35aa99
+[2026-02-18T13:24:57.379Z] #20 exporting manifest list sha256:7f7837a7d385c2ec4691680307686c6bb2ee5d522c716fa556cfc4f61e35aa99 done
+[2026-02-18T13:24:57.379Z] #20 naming to ****/notes-backend:6246005 done
+[2026-02-18T13:24:57.379Z] #20 unpacking to ****/notes-backend:6246005
+[2026-02-18T13:24:59.272Z] #20 unpacking to ****/notes-backend:6246005 1.9s done
+[2026-02-18T13:24:59.272Z] #20 naming to ****/notes-backend:latest done
+[2026-02-18T13:24:59.272Z] #20 unpacking to ****/notes-backend:latest 0.0s done
+[2026-02-18T13:24:59.272Z] #20 DONE 2.0s
+[2026-02-18T13:24:59.272Z] + docker build --label git.commit=6246005 --label build.number=15 --label build.url=http://jenkins-dev-alb-1488972025.eu-west-1.elb.amazonaws.com/job/jenkins%20lab/15/ -t ****/notes-frontend:6246005 -t ****/notes-frontend:latest ./frontend
+[2026-02-18T13:24:59.530Z] #0 building with "default" instance using docker driver
+[2026-02-18T13:24:59.530Z] 
+[2026-02-18T13:24:59.530Z] #1 [internal] load build definition from Dockerfile
+[2026-02-18T13:24:59.530Z] #1 transferring dockerfile: 2.69kB done
+[2026-02-18T13:24:59.530Z] #1 DONE 0.0s
+[2026-02-18T13:24:59.530Z] 
+[2026-02-18T13:24:59.530Z] #2 [internal] load metadata for docker.io/library/node:20-alpine
+[2026-02-18T13:24:59.530Z] #2 DONE 0.1s
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #3 [internal] load .dockerignore
+[2026-02-18T13:24:59.786Z] #3 transferring context: 624B done
+[2026-02-18T13:24:59.786Z] #3 DONE 0.0s
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #4 [deps 1/5] FROM docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8
+[2026-02-18T13:24:59.786Z] #4 resolve docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8 0.0s done
+[2026-02-18T13:24:59.786Z] #4 DONE 0.0s
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #5 [internal] load build context
+[2026-02-18T13:24:59.786Z] #5 transferring context: 45.05kB done
+[2026-02-18T13:24:59.786Z] #5 DONE 0.0s
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #6 [production  6/10] COPY --from=builder /app/public ./public
+[2026-02-18T13:24:59.786Z] #6 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #7 [production  8/10] COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+[2026-02-18T13:24:59.786Z] #7 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #8 [builder 3/5] COPY --from=deps /app/node_modules ./node_modules
+[2026-02-18T13:24:59.786Z] #8 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #9 [deps 5/5] RUN npm install && npm cache clean --force
+[2026-02-18T13:24:59.786Z] #9 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #10 [builder 4/5] COPY . .
+[2026-02-18T13:24:59.786Z] #10 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #11 [deps 2/5] RUN apk add --no-cache libc6-compat
+[2026-02-18T13:24:59.786Z] #11 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #12 [production  3/10] WORKDIR /app
+[2026-02-18T13:24:59.786Z] #12 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #13 [production  9/10] COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+[2026-02-18T13:24:59.786Z] #13 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #14 [deps 3/5] WORKDIR /app
+[2026-02-18T13:24:59.786Z] #14 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #15 [production  5/10] RUN mkdir -p ./public
+[2026-02-18T13:24:59.786Z] #15 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #16 [production  4/10] RUN addgroup -g 1001 -S nodejs &&     adduser -S nextjs -u 1001 -G nodejs
+[2026-02-18T13:24:59.786Z] #16 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #17 [builder 5/5] RUN npm run build
+[2026-02-18T13:24:59.786Z] #17 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #18 [deps 4/5] COPY package*.json ./
+[2026-02-18T13:24:59.786Z] #18 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #19 [production  2/10] RUN apk add --no-cache wget
+[2026-02-18T13:24:59.786Z] #19 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #20 [production  7/10] RUN mkdir -p .next && chown nextjs:nodejs .next
+[2026-02-18T13:24:59.786Z] #20 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #21 [builder 2/5] WORKDIR /app
+[2026-02-18T13:24:59.786Z] #21 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #22 [production 10/10] RUN ls -la /app/ && test -f /app/server.js
+[2026-02-18T13:24:59.786Z] #22 CACHED
+[2026-02-18T13:24:59.786Z] 
+[2026-02-18T13:24:59.786Z] #23 exporting to image
+[2026-02-18T13:24:59.786Z] #23 exporting layers done
+[2026-02-18T13:24:59.786Z] #23 exporting manifest sha256:43861291332617dfb617a14331927a7d6d5d99198ccb2bba42a5c9f667412d2b 0.0s done
+[2026-02-18T13:24:59.786Z] #23 exporting config sha256:342ead171c4769270c49d55f2e62b5b347679702e261edbca6fb6c2fa21665b5 done
+[2026-02-18T13:24:59.786Z] #23 exporting attestation manifest sha256:a6feab4e04fb95b892515b5e21d52a26145fee3d9a378a95de90db0e6bf0a35b 0.0s done
+[2026-02-18T13:24:59.786Z] #23 exporting manifest list sha256:83fa22d16f671998f6aae0b5f507b4deb070dfd7f5fb491a37eb78964f3f2dac
+[2026-02-18T13:25:00.045Z] #23 exporting manifest list sha256:83fa22d16f671998f6aae0b5f507b4deb070dfd7f5fb491a37eb78964f3f2dac done
+[2026-02-18T13:25:00.045Z] #23 naming to ****/notes-frontend:6246005 done
+[2026-02-18T13:25:00.045Z] #23 unpacking to ****/notes-frontend:6246005
+[2026-02-18T13:25:00.306Z] #23 unpacking to ****/notes-frontend:6246005 0.6s done
+[2026-02-18T13:25:00.564Z] #23 naming to ****/notes-frontend:latest done
+[2026-02-18T13:25:00.564Z] #23 unpacking to ****/notes-frontend:latest 0.0s done
+[2026-02-18T13:25:00.564Z] #23 DONE 0.7s
+[2026-02-18T13:25:00.564Z] + docker build --label git.commit=6246005 --label build.number=15 --label build.url=http://jenkins-dev-alb-1488972025.eu-west-1.elb.amazonaws.com/job/jenkins%20lab/15/ -t ****/notes-proxy:6246005 -t ****/notes-proxy:latest ./nginx
+[2026-02-18T13:25:00.822Z] #0 building with "default" instance using docker driver
+[2026-02-18T13:25:00.822Z] 
+[2026-02-18T13:25:00.822Z] #1 [internal] load build definition from Dockerfile
+[2026-02-18T13:25:00.822Z] #1 transferring dockerfile: 1.04kB done
+[2026-02-18T13:25:00.822Z] #1 DONE 0.0s
+[2026-02-18T13:25:00.822Z] 
+[2026-02-18T13:25:00.822Z] #2 [internal] load metadata for docker.io/library/nginx:1.25-alpine
+[2026-02-18T13:25:01.399Z] #2 DONE 0.5s
+[2026-02-18T13:25:01.399Z] 
+[2026-02-18T13:25:01.399Z] #3 [internal] load .dockerignore
+[2026-02-18T13:25:01.399Z] #3 transferring context: 2B done
+[2026-02-18T13:25:01.399Z] #3 DONE 0.0s
+[2026-02-18T13:25:01.399Z] 
+[2026-02-18T13:25:01.399Z] #4 [1/4] FROM docker.io/library/nginx:1.25-alpine@sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00
+[2026-02-18T13:25:01.400Z] #4 resolve docker.io/library/nginx:1.25-alpine@sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00 0.0s done
+[2026-02-18T13:25:01.400Z] #4 DONE 0.0s
+[2026-02-18T13:25:01.400Z] 
+[2026-02-18T13:25:01.400Z] #5 [internal] load build context
+[2026-02-18T13:25:01.400Z] #5 transferring context: 6.12kB done
+[2026-02-18T13:25:01.400Z] #5 DONE 0.0s
+[2026-02-18T13:25:01.400Z] 
+[2026-02-18T13:25:01.400Z] #6 [2/4] RUN rm /etc/nginx/conf.d/default.conf
+[2026-02-18T13:25:01.400Z] #6 CACHED
+[2026-02-18T13:25:01.400Z] 
+[2026-02-18T13:25:01.400Z] #7 [3/4] COPY nginx.conf /etc/nginx/nginx.conf
+[2026-02-18T13:25:01.400Z] #7 CACHED
+[2026-02-18T13:25:01.400Z] 
+[2026-02-18T13:25:01.400Z] #8 [4/4] RUN addgroup -g 1001 -S nginx-group &&     chown -R nginx:nginx-group /var/cache/nginx &&     chown -R nginx:nginx-group /var/log/nginx &&     touch /var/run/nginx.pid &&     chown -R nginx:nginx-group /var/run/nginx.pid
+[2026-02-18T13:25:01.400Z] #8 CACHED
+[2026-02-18T13:25:01.400Z] 
+[2026-02-18T13:25:01.400Z] #9 exporting to image
+[2026-02-18T13:25:01.400Z] #9 exporting layers
+[2026-02-18T13:25:01.400Z] #9 exporting layers 0.0s done
+[2026-02-18T13:25:01.400Z] #9 exporting manifest sha256:3c60568504651ccd71b0f25c86030245e948ca45c89422a2bce0185c034ef681 0.0s done
+[2026-02-18T13:25:01.400Z] #9 exporting config sha256:00930dfd3e83b1a396f3416542aa204d3d29a647b43420ec091d767af6c0b3ab 0.0s done
+[2026-02-18T13:25:01.400Z] #9 exporting attestation manifest sha256:200101dceef5dd05b0d390d5120a8a7736d563639b8c4672fd11ec0586d31079
+[2026-02-18T13:25:01.670Z] #9 exporting attestation manifest sha256:200101dceef5dd05b0d390d5120a8a7736d563639b8c4672fd11ec0586d31079 0.1s done
+[2026-02-18T13:25:01.670Z] #9 exporting manifest list sha256:4a139ea6966ff7b1dcfeb35829771ed148c23031f597092af1a3efb256244d7a 0.0s done
+[2026-02-18T13:25:01.670Z] #9 naming to ****/notes-proxy:6246005 done
+[2026-02-18T13:25:01.670Z] #9 unpacking to ****/notes-proxy:6246005
+[2026-02-18T13:25:01.670Z] #9 unpacking to ****/notes-proxy:6246005 0.2s done
+[2026-02-18T13:25:01.942Z] #9 naming to ****/notes-proxy:latest 0.0s done
+[2026-02-18T13:25:01.942Z] #9 unpacking to ****/notes-proxy:latest
+[2026-02-18T13:25:02.227Z] #9 unpacking to ****/notes-proxy:latest 0.2s done
+[2026-02-18T13:25:02.227Z] #9 DONE 0.8s
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Image Vulnerability Scan)
+[Pipeline] echo
+[2026-02-18T13:25:03.491Z] 🛡️  Scanning Docker images with Trivy...
+[Pipeline] withCredentials
+[2026-02-18T13:25:03.584Z] Masking supported pattern matches of $ECR_REGISTRY
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
+[2026-02-18T13:25:04.222Z] + mkdir -p /home/jenkins/bin
+[2026-02-18T13:25:04.222Z] + 
+[2026-02-18T13:25:04.222Z] + echo Installing Trivy to /home/jenkins/bin...
+[2026-02-18T13:25:04.222Z] Installing Trivy to /home/jenkins/bin...
+[2026-02-18T13:25:04.222Z] + /home/jenkins/bin/trivy --version
+[2026-02-18T13:25:04.222Z] + curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh
+[2026-02-18T13:25:04.222Z] + sh -s -- -b /home/jenkins/bin
+[2026-02-18T13:25:04.222Z] aquasecurity/trivy info checking GitHub for latest tag
+[2026-02-18T13:25:04.485Z] Version: 0.69.1
+[2026-02-18T13:25:04.485Z] Vulnerability DB:
+[2026-02-18T13:25:04.485Z]   Version: 2
+[2026-02-18T13:25:04.485Z]   UpdatedAt: 2026-02-18 06:50:32.257816078 +0000 UTC
+[2026-02-18T13:25:04.485Z]   NextUpdate: 2026-02-19 06:50:32.257815717 +0000 UTC
+[2026-02-18T13:25:04.485Z]   DownloadedAt: 2026-02-18 12:14:03.325643749 +0000 UTC
+[2026-02-18T13:25:04.741Z] aquasecurity/trivy info found version: 0.69.1 for v0.69.1/Linux/64bit
+[2026-02-18T13:25:08.027Z] aquasecurity/trivy info installed /home/jenkins/bin/trivy
+[Pipeline] echo
+[2026-02-18T13:25:08.144Z] Scanning Backend image...
+[Pipeline] sh
+[2026-02-18T13:25:08.209Z] Warning: A secret was passed to "sh" using Groovy String interpolation, which is insecure.
+[2026-02-18T13:25:08.210Z] 		 Affected argument(s) used the following variable(s): [ECR_REGISTRY]
+[2026-02-18T13:25:08.210Z] 		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
+[2026-02-18T13:25:08.480Z] + /home/jenkins/bin/trivy image --exit-code 0 --severity CRITICAL --no-progress --format table --output trivy-backend.txt ****/notes-backend:6246005
+[2026-02-18T13:25:08.480Z] 2026-02-18T13:25:08Z	INFO	[vuln] Vulnerability scanning is enabled
+[2026-02-18T13:25:08.480Z] 2026-02-18T13:25:08Z	INFO	[secret] Secret scanning is enabled
+[2026-02-18T13:25:08.480Z] 2026-02-18T13:25:08Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+[2026-02-18T13:25:08.480Z] 2026-02-18T13:25:08Z	INFO	[secret] Please see https://trivy.dev/docs/v0.69/guide/scanner/secret#recommendation for faster secret detection
+[2026-02-18T13:25:08.480Z] 2026-02-18T13:25:08Z	INFO	Detected OS	family="alpine" version="3.23.3"
+[2026-02-18T13:25:08.480Z] 2026-02-18T13:25:08Z	INFO	[alpine] Detecting vulnerabilities...	os_version="3.23" repository="3.23" pkg_num=22
+[2026-02-18T13:25:08.480Z] 2026-02-18T13:25:08Z	INFO	Number of language-specific files	num=1
+[2026-02-18T13:25:08.480Z] 2026-02-18T13:25:08Z	INFO	[node-pkg] Detecting vulnerabilities...
+[Pipeline] echo
+[2026-02-18T13:25:08.809Z] Scanning Frontend image...
+[Pipeline] sh
+[2026-02-18T13:25:08.881Z] Warning: A secret was passed to "sh" using Groovy String interpolation, which is insecure.
+[2026-02-18T13:25:08.881Z] 		 Affected argument(s) used the following variable(s): [ECR_REGISTRY]
+[2026-02-18T13:25:08.881Z] 		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
+[2026-02-18T13:25:09.150Z] + /home/jenkins/bin/trivy image --exit-code 0 --severity CRITICAL --no-progress --format table --output trivy-frontend.txt ****/notes-frontend:6246005
+[2026-02-18T13:25:09.150Z] 2026-02-18T13:25:08Z	INFO	[vuln] Vulnerability scanning is enabled
+[2026-02-18T13:25:09.150Z] 2026-02-18T13:25:08Z	INFO	[secret] Secret scanning is enabled
+[2026-02-18T13:25:09.150Z] 2026-02-18T13:25:08Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+[2026-02-18T13:25:09.150Z] 2026-02-18T13:25:08Z	INFO	[secret] Please see https://trivy.dev/docs/v0.69/guide/scanner/secret#recommendation for faster secret detection
+[2026-02-18T13:25:09.150Z] 2026-02-18T13:25:09Z	INFO	Detected OS	family="alpine" version="3.23.3"
+[2026-02-18T13:25:09.150Z] 2026-02-18T13:25:09Z	INFO	[alpine] Detecting vulnerabilities...	os_version="3.23" repository="3.23" pkg_num=22
+[2026-02-18T13:25:09.150Z] 2026-02-18T13:25:09Z	INFO	Number of language-specific files	num=1
+[2026-02-18T13:25:09.150Z] 2026-02-18T13:25:09Z	INFO	[node-pkg] Detecting vulnerabilities...
+[2026-02-18T13:25:09.406Z] 2026-02-18T13:25:09Z	INFO	Table result includes only package filenames. Use '--format json' option to get the full path to the package file.
+[Pipeline] echo
+[2026-02-18T13:25:09.509Z] Scanning Proxy image...
+[Pipeline] sh
+[2026-02-18T13:25:09.589Z] Warning: A secret was passed to "sh" using Groovy String interpolation, which is insecure.
+[2026-02-18T13:25:09.589Z] 		 Affected argument(s) used the following variable(s): [ECR_REGISTRY]
+[2026-02-18T13:25:09.589Z] 		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
+[2026-02-18T13:25:09.861Z] + /home/jenkins/bin/trivy image --exit-code 0 --severity CRITICAL --no-progress --format table --output trivy-proxy.txt ****/notes-proxy:6246005
+[2026-02-18T13:25:09.861Z] 2026-02-18T13:25:09Z	INFO	[vuln] Vulnerability scanning is enabled
+[2026-02-18T13:25:09.861Z] 2026-02-18T13:25:09Z	INFO	[secret] Secret scanning is enabled
+[2026-02-18T13:25:09.861Z] 2026-02-18T13:25:09Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+[2026-02-18T13:25:09.861Z] 2026-02-18T13:25:09Z	INFO	[secret] Please see https://trivy.dev/docs/v0.69/guide/scanner/secret#recommendation for faster secret detection
+[2026-02-18T13:25:09.861Z] 2026-02-18T13:25:09Z	INFO	Detected OS	family="alpine" version="3.19.1"
+[2026-02-18T13:25:09.861Z] 2026-02-18T13:25:09Z	INFO	[alpine] Detecting vulnerabilities...	os_version="3.19" repository="3.19" pkg_num=66
+[2026-02-18T13:25:09.861Z] 2026-02-18T13:25:09Z	INFO	Number of language-specific files	num=0
+[2026-02-18T13:25:09.861Z] 2026-02-18T13:25:09Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.69/guide/scanner/vulnerability#severity-selection for details.
+[2026-02-18T13:25:09.861Z] 2026-02-18T13:25:09Z	WARN	This OS version is no longer supported by the distribution	family="alpine" version="3.19.1"
+[2026-02-18T13:25:09.861Z] 2026-02-18T13:25:09Z	WARN	The vulnerability detection may be insufficient because security updates are not provided
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // withCredentials
+Post stage
+[Pipeline] archiveArtifacts
+[2026-02-18T13:25:10.424Z] Archiving artifacts
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Push to ECR)
+[Pipeline] echo
+[2026-02-18T13:25:10.974Z] 📤 Pushing images to Amazon ECR...
+[Pipeline] withCredentials
+[2026-02-18T13:25:11.140Z] Masking supported pattern matches of $AWS_ACCESS_KEY_ID or $AWS_SECRET_ACCESS_KEY or $AWS_REGION or $ECR_REGISTRY
+[Pipeline] {
+[Pipeline] sh
+[2026-02-18T13:25:11.272Z] Warning: A secret was passed to "sh" using Groovy String interpolation, which is insecure.
+[2026-02-18T13:25:11.272Z] 		 Affected argument(s) used the following variable(s): [ECR_REGISTRY, AWS_REGION]
+[2026-02-18T13:25:11.272Z] 		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
+[2026-02-18T13:25:11.544Z] + aws ecr get-login-password --region ****
+[2026-02-18T13:25:11.544Z] + docker login --username AWS --password-stdin ****
+[2026-02-18T13:25:12.473Z] 
+[2026-02-18T13:25:12.473Z] WARNING! Your credentials are stored unencrypted in '/home/jenkins/.docker/config.json'.
+[2026-02-18T13:25:12.473Z] Configure a credential helper to remove this warning. See
+[2026-02-18T13:25:12.473Z] https://docs.docker.com/go/credential-store/
+[2026-02-18T13:25:12.473Z] 
+[2026-02-18T13:25:12.473Z] Login Succeeded
+[2026-02-18T13:25:12.473Z] + docker push ****/notes-backend:6246005
+[2026-02-18T13:25:12.473Z] The push refers to repository [****/notes-backend]
+[2026-02-18T13:25:12.473Z] b84388b949f0: Waiting
+[2026-02-18T13:25:12.473Z] 4f4fb700ef54: Layer already exists
+[2026-02-18T13:25:12.473Z] 589002ba0eae: Layer already exists
+[2026-02-18T13:25:12.473Z] ad6d96c196e3: Layer already exists
+[2026-02-18T13:25:12.473Z] 0ba6bf64c586: Layer already exists
+[2026-02-18T13:25:12.473Z] e1bed480603a: Layer already exists
+[2026-02-18T13:25:12.473Z] bcd86ab121b1: Layer already exists
+[2026-02-18T13:25:12.474Z] 9dd1e764a28f: Layer already exists
+[2026-02-18T13:25:12.474Z] 0a5dc8d805c3: Layer already exists
+[2026-02-18T13:25:12.474Z] eb87f4721c91: Layer already exists
+[2026-02-18T13:25:12.474Z] daac4bdc05b1: Layer already exists
+[2026-02-18T13:25:12.474Z] e31b20165522: Layer already exists
+[2026-02-18T13:25:12.729Z] b84388b949f0: Pushed
+[2026-02-18T13:25:13.295Z] 6246005: digest: sha256:7f7837a7d385c2ec4691680307686c6bb2ee5d522c716fa556cfc4f61e35aa99 size: 856
+[2026-02-18T13:25:13.295Z] + docker push ****/notes-backend:latest
+[2026-02-18T13:25:13.295Z] The push refers to repository [****/notes-backend]
+[2026-02-18T13:25:13.552Z] b84388b949f0: Already exists
+[2026-02-18T13:25:13.552Z] ad6d96c196e3: Layer already exists
+[2026-02-18T13:25:13.552Z] eb87f4721c91: Layer already exists
+[2026-02-18T13:25:13.552Z] e31b20165522: Layer already exists
+[2026-02-18T13:25:13.552Z] 0a5dc8d805c3: Layer already exists
+[2026-02-18T13:25:13.552Z] 0ba6bf64c586: Layer already exists
+[2026-02-18T13:25:13.552Z] 4f4fb700ef54: Layer already exists
+[2026-02-18T13:25:13.552Z] bcd86ab121b1: Layer already exists
+[2026-02-18T13:25:13.552Z] 589002ba0eae: Layer already exists
+[2026-02-18T13:25:13.552Z] daac4bdc05b1: Layer already exists
+[2026-02-18T13:25:13.552Z] 9dd1e764a28f: Layer already exists
+[2026-02-18T13:25:13.552Z] e1bed480603a: Layer already exists
+[2026-02-18T13:25:13.808Z] latest: digest: sha256:7f7837a7d385c2ec4691680307686c6bb2ee5d522c716fa556cfc4f61e35aa99 size: 856
+[2026-02-18T13:25:13.808Z] + docker push ****/notes-frontend:6246005
+[2026-02-18T13:25:13.808Z] The push refers to repository [****/notes-frontend]
+[2026-02-18T13:25:13.808Z] e31b20165522: Layer already exists
+[2026-02-18T13:25:13.808Z] 4d72988b5ed7: Layer already exists
+[2026-02-18T13:25:13.808Z] bcd86ab121b1: Layer already exists
+[2026-02-18T13:25:13.808Z] c58a629c30d6: Waiting
+[2026-02-18T13:25:13.808Z] 4b721856b122: Layer already exists
+[2026-02-18T13:25:13.808Z] ad6d96c196e3: Layer already exists
+[2026-02-18T13:25:13.808Z] 3478b55c02c9: Layer already exists
+[2026-02-18T13:25:13.808Z] 89e4267fee10: Layer already exists
+[2026-02-18T13:25:13.808Z] 35a819d48155: Layer already exists
+[2026-02-18T13:25:13.808Z] 4f4fb700ef54: Layer already exists
+[2026-02-18T13:25:13.808Z] 589002ba0eae: Layer already exists
+[2026-02-18T13:25:13.808Z] 0bd6119897d4: Layer already exists
+[2026-02-18T13:25:13.808Z] de38229dbff9: Layer already exists
+[2026-02-18T13:25:13.808Z] eb87f4721c91: Layer already exists
+[2026-02-18T13:25:14.064Z] c58a629c30d6: Pushed
+[2026-02-18T13:25:14.626Z] 6246005: digest: sha256:83fa22d16f671998f6aae0b5f507b4deb070dfd7f5fb491a37eb78964f3f2dac size: 856
+[2026-02-18T13:25:14.626Z] + docker push ****/notes-frontend:latest
+[2026-02-18T13:25:14.626Z] The push refers to repository [****/notes-frontend]
+[2026-02-18T13:25:14.885Z] 4d72988b5ed7: Layer already exists
+[2026-02-18T13:25:14.885Z] 35a819d48155: Layer already exists
+[2026-02-18T13:25:14.885Z] c58a629c30d6: Already exists
+[2026-02-18T13:25:14.885Z] 589002ba0eae: Layer already exists
+[2026-02-18T13:25:14.885Z] ad6d96c196e3: Layer already exists
+[2026-02-18T13:25:14.885Z] e31b20165522: Layer already exists
+[2026-02-18T13:25:14.885Z] bcd86ab121b1: Layer already exists
+[2026-02-18T13:25:14.885Z] 4b721856b122: Layer already exists
+[2026-02-18T13:25:14.885Z] de38229dbff9: Layer already exists
+[2026-02-18T13:25:14.885Z] 3478b55c02c9: Layer already exists
+[2026-02-18T13:25:14.885Z] 4f4fb700ef54: Layer already exists
+[2026-02-18T13:25:14.885Z] eb87f4721c91: Layer already exists
+[2026-02-18T13:25:14.885Z] 89e4267fee10: Layer already exists
+[2026-02-18T13:25:14.885Z] 0bd6119897d4: Layer already exists
+[2026-02-18T13:25:15.141Z] latest: digest: sha256:83fa22d16f671998f6aae0b5f507b4deb070dfd7f5fb491a37eb78964f3f2dac size: 856
+[2026-02-18T13:25:15.141Z] + docker push ****/notes-proxy:6246005
+[2026-02-18T13:25:15.141Z] The push refers to repository [****/notes-proxy]
+[2026-02-18T13:25:15.141Z] 452470029c53: Layer already exists
+[2026-02-18T13:25:15.141Z] 4abcf2066143: Layer already exists
+[2026-02-18T13:25:15.141Z] e6ef242c1570: Layer already exists
+[2026-02-18T13:25:15.141Z] 5406ed7b06d9: Layer already exists
+[2026-02-18T13:25:15.141Z] 8a3742a9529d: Layer already exists
+[2026-02-18T13:25:15.141Z] 9fc545722c5e: Layer already exists
+[2026-02-18T13:25:15.141Z] 6853607a85cd: Layer already exists
+[2026-02-18T13:25:15.141Z] 3ba10497fe9d: Waiting
+[2026-02-18T13:25:15.141Z] d4bca490e609: Layer already exists
+[2026-02-18T13:25:15.141Z] fc21a1d387f5: Layer already exists
+[2026-02-18T13:25:15.141Z] 13fcfbc94648: Layer already exists
+[2026-02-18T13:25:15.141Z] 0d0c16747d2c: Layer already exists
+[2026-02-18T13:25:15.398Z] 3ba10497fe9d: Pushed
+[2026-02-18T13:25:15.960Z] 6246005: digest: sha256:4a139ea6966ff7b1dcfeb35829771ed148c23031f597092af1a3efb256244d7a size: 856
+[2026-02-18T13:25:15.960Z] + docker push ****/notes-proxy:latest
+[2026-02-18T13:25:15.960Z] The push refers to repository [****/notes-proxy]
+[2026-02-18T13:25:16.220Z] 0d0c16747d2c: Layer already exists
+[2026-02-18T13:25:16.220Z] 9fc545722c5e: Layer already exists
+[2026-02-18T13:25:16.220Z] 3ba10497fe9d: Already exists
+[2026-02-18T13:25:16.220Z] 452470029c53: Layer already exists
+[2026-02-18T13:25:16.220Z] 13fcfbc94648: Layer already exists
+[2026-02-18T13:25:16.220Z] 5406ed7b06d9: Layer already exists
+[2026-02-18T13:25:16.220Z] 6853607a85cd: Layer already exists
+[2026-02-18T13:25:16.220Z] 4abcf2066143: Layer already exists
+[2026-02-18T13:25:16.220Z] fc21a1d387f5: Layer already exists
+[2026-02-18T13:25:16.220Z] e6ef242c1570: Layer already exists
+[2026-02-18T13:25:16.220Z] d4bca490e609: Layer already exists
+[2026-02-18T13:25:16.220Z] 8a3742a9529d: Layer already exists
+[2026-02-18T13:25:16.477Z] latest: digest: sha256:4a139ea6966ff7b1dcfeb35829771ed148c23031f597092af1a3efb256244d7a size: 856
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy to EC2)
+[Pipeline] echo
+[2026-02-18T13:25:17.213Z] 🚀 Deploying to EC2...
+[Pipeline] withCredentials
+[2026-02-18T13:25:17.532Z] Masking supported pattern matches of $AWS_ACCESS_KEY_ID or $AWS_SECRET_ACCESS_KEY or $AWS_REGION or $ECR_REGISTRY or $EC2_HOST or $DB_USERNAME or $DB_PASSWORD or $DB_NAME or $SSH_KEY
+[Pipeline] {
+[Pipeline] sh
+[2026-02-18T13:25:17.661Z] Warning: A secret was passed to "sh" using Groovy String interpolation, which is insecure.
+[2026-02-18T13:25:17.661Z] 		 Affected argument(s) used the following variable(s): [ECR_REGISTRY, AWS_REGION, EC2_HOST, DB_USERNAME, DB_NAME, DB_PASSWORD]
+[2026-02-18T13:25:17.661Z] 		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
+[2026-02-18T13:25:17.931Z] + set -e
+[2026-02-18T13:25:17.931Z] + set -x
+[2026-02-18T13:25:17.931Z] + cat
+[2026-02-18T13:25:17.931Z] + echo 📂 Copying files to ****...
+[2026-02-18T13:25:17.931Z] 📂 Copying files to ****...
+[2026-02-18T13:25:17.931Z] + scp -v -o StrictHostKeyChecking=no -i **** .env docker-compose.ecr.yml ubuntu@****:/opt/notes-app/
+[2026-02-18T13:25:17.931Z] Executing: program /usr/bin/ssh host ****, user ubuntu, command scp -v -d -t /opt/notes-app/
+[2026-02-18T13:25:17.931Z] OpenSSH_8.9p1 Ubuntu-3ubuntu0.13, OpenSSL 3.0.2 15 Mar 2022
+[2026-02-18T13:25:17.931Z] debug1: Reading configuration data /home/jenkins/.ssh/config
+[2026-02-18T13:25:17.931Z] debug1: /home/jenkins/.ssh/config line 2: Applying options for *
+[2026-02-18T13:25:17.931Z] debug1: Reading configuration data /etc/ssh/ssh_config
+[2026-02-18T13:25:17.931Z] debug1: /etc/ssh/ssh_config line 19: include /etc/ssh/ssh_config.d/*.conf matched no files
+[2026-02-18T13:25:17.931Z] debug1: /etc/ssh/ssh_config line 21: Applying options for *
+[2026-02-18T13:25:17.931Z] debug1: Connecting to **** [****] port 22.
+[2026-02-18T13:25:17.931Z] debug1: Connection established.
+[2026-02-18T13:25:17.931Z] debug1: identity file **** type -1
+[2026-02-18T13:25:17.931Z] debug1: identity file ****-cert type -1
+[2026-02-18T13:25:17.931Z] debug1: Local version string SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.13
+[2026-02-18T13:25:17.931Z] debug1: Remote protocol version 2.0, remote software version OpenSSH_8.9p1 Ubuntu-3ubuntu0.13
+[2026-02-18T13:25:17.931Z] debug1: compat_banner: match: OpenSSH_8.9p1 Ubuntu-3ubuntu0.13 pat OpenSSH* compat 0x04000000
+[2026-02-18T13:25:17.931Z] debug1: Authenticating to ****:22 as 'ubuntu'
+[2026-02-18T13:25:17.931Z] debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+[2026-02-18T13:25:17.931Z] debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+[2026-02-18T13:25:17.931Z] debug1: SSH2_MSG_KEXINIT sent
+[2026-02-18T13:25:17.931Z] debug1: SSH2_MSG_KEXINIT received
+[2026-02-18T13:25:17.931Z] debug1: kex: algorithm: curve25519-sha256
+[2026-02-18T13:25:17.931Z] debug1: kex: host key algorithm: ssh-ed25519
+[2026-02-18T13:25:17.931Z] debug1: kex: server->client cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+[2026-02-18T13:25:17.931Z] debug1: kex: client->server cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+[2026-02-18T13:25:17.931Z] debug1: expecting SSH2_MSG_KEX_ECDH_REPLY
+[2026-02-18T13:25:17.931Z] debug1: SSH2_MSG_KEX_ECDH_REPLY received
+[2026-02-18T13:25:17.932Z] debug1: Server host key: ssh-ed25519 SHA256:mSj/H9UyK077Oy478H6wMNhilkMV6UZBQXVpkhml5fk
+[2026-02-18T13:25:17.932Z] debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+[2026-02-18T13:25:17.932Z] debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+[2026-02-18T13:25:17.932Z] Warning: Permanently added **** (ED25519) to the list of known hosts.
+[2026-02-18T13:25:17.932Z] debug1: ssh_packet_send2_wrapped: resetting send seqnr 3
+[2026-02-18T13:25:17.932Z] debug1: rekey out after 134217728 blocks
+[2026-02-18T13:25:17.932Z] debug1: SSH2_MSG_NEWKEYS sent
+[2026-02-18T13:25:17.932Z] debug1: expecting SSH2_MSG_NEWKEYS
+[2026-02-18T13:25:17.932Z] debug1: ssh_packet_read_poll2: resetting read seqnr 3
+[2026-02-18T13:25:17.932Z] debug1: SSH2_MSG_NEWKEYS received
+[2026-02-18T13:25:17.932Z] debug1: rekey in after 134217728 blocks
+[2026-02-18T13:25:17.932Z] debug1: Will attempt key: ****  explicit
+[2026-02-18T13:25:17.932Z] debug1: SSH2_MSG_EXT_INFO received
+[2026-02-18T13:25:17.932Z] debug1: kex_input_ext_info: server-sig-algs=<ssh-ed25519,sk-ssh-ed25519@openssh.com,ssh-rsa,rsa-sha2-256,rsa-sha2-512,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ecdsa-sha2-nistp256@openssh.com,webauthn-sk-ecdsa-sha2-nistp256@openssh.com>
+[2026-02-18T13:25:17.932Z] debug1: kex_input_ext_info: publickey-hostbound@openssh.com=<0>
+[2026-02-18T13:25:17.932Z] debug1: SSH2_MSG_SERVICE_ACCEPT received
+[2026-02-18T13:25:17.932Z] debug1: Authentications that can continue: publickey
+[2026-02-18T13:25:17.932Z] debug1: Next authentication method: publickey
+[2026-02-18T13:25:17.932Z] debug1: Trying private key: ****
+[2026-02-18T13:25:17.932Z] Authenticated to **** ([****]:22) using "publickey".
+[2026-02-18T13:25:17.932Z] debug1: channel 0: new [client-session]
+[2026-02-18T13:25:17.932Z] debug1: Requesting no-more-sessions@openssh.com
+[2026-02-18T13:25:17.932Z] debug1: Entering interactive session.
+[2026-02-18T13:25:17.932Z] debug1: pledge: network
+[2026-02-18T13:25:18.862Z] debug1: client_input_global_request: rtype hostkeys-00@openssh.com want_reply 0
+[2026-02-18T13:25:18.862Z] debug1: Remote: /home/ubuntu/.ssh/authorized_keys:1: key options: agent-forwarding port-forwarding pty user-rc x11-forwarding
+[2026-02-18T13:25:18.862Z] debug1: Sending environment.
+[2026-02-18T13:25:18.862Z] debug1: channel 0: setting env LANG = "C.UTF-8"
+[2026-02-18T13:25:18.862Z] debug1: Sending command: scp -v -d -t /opt/notes-app/
+[2026-02-18T13:25:18.862Z] scp: debug1: fd 3 clearing O_NONBLOCK
+[2026-02-18T13:25:18.862Z] Sending file modes: C0664 188 .env
+[2026-02-18T13:25:18.862Z] Sink: C0664 188 .env
+[2026-02-18T13:25:18.862Z] scp: debug1: fd 6 clearing O_NONBLOCK
+[2026-02-18T13:25:18.862Z] scp: debug1: fd 0 clearing O_NONBLOCK
+[2026-02-18T13:25:18.862Z] scp: debug1: fd 3 clearing O_NONBLOCK
+[2026-02-18T13:25:18.862Z] Sending file modes: C0664 3044 docker-compose.ecr.yml
+[2026-02-18T13:25:18.862Z] Sink: C0664 3044 docker-compose.ecr.yml
+[2026-02-18T13:25:18.862Z] scp: debug1: fd 6 clearing O_NONBLOCK
+[2026-02-18T13:25:18.862Z] scp: debug1: fd 0 clearing O_NONBLOCK
+[2026-02-18T13:25:18.862Z] debug1: client_input_channel_req: channel 0 rtype exit-status reply 0
+[2026-02-18T13:25:18.862Z] debug1: channel 0: free: client-session, nchannels 1
+[2026-02-18T13:25:18.862Z] Transferred: sent 6584, received 2924 bytes, in 0.9 seconds
+[2026-02-18T13:25:18.862Z] Bytes per second: sent 7540.9, received 3349.0
+[2026-02-18T13:25:18.862Z] debug1: Exit status 0
+[2026-02-18T13:25:18.862Z] + echo 🚀 executing remote commands on ****...
+[2026-02-18T13:25:18.862Z] 🚀 executing remote commands on ****...
+[2026-02-18T13:25:18.862Z] + ssh -v -o StrictHostKeyChecking=no -i **** ubuntu@**** bash -s
+[2026-02-18T13:25:18.862Z] OpenSSH_8.9p1 Ubuntu-3ubuntu0.13, OpenSSL 3.0.2 15 Mar 2022
+[2026-02-18T13:25:18.862Z] debug1: Reading configuration data /home/jenkins/.ssh/config
+[2026-02-18T13:25:18.862Z] debug1: /home/jenkins/.ssh/config line 2: Applying options for *
+[2026-02-18T13:25:18.862Z] debug1: Reading configuration data /etc/ssh/ssh_config
+[2026-02-18T13:25:18.862Z] debug1: /etc/ssh/ssh_config line 19: include /etc/ssh/ssh_config.d/*.conf matched no files
+[2026-02-18T13:25:18.862Z] debug1: /etc/ssh/ssh_config line 21: Applying options for *
+[2026-02-18T13:25:18.862Z] debug1: Connecting to **** [****] port 22.
+[2026-02-18T13:25:18.862Z] debug1: Connection established.
+[2026-02-18T13:25:18.862Z] debug1: identity file **** type -1
+[2026-02-18T13:25:18.862Z] debug1: identity file ****-cert type -1
+[2026-02-18T13:25:18.862Z] debug1: Local version string SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.13
+[2026-02-18T13:25:18.862Z] debug1: Remote protocol version 2.0, remote software version OpenSSH_8.9p1 Ubuntu-3ubuntu0.13
+[2026-02-18T13:25:18.862Z] debug1: compat_banner: match: OpenSSH_8.9p1 Ubuntu-3ubuntu0.13 pat OpenSSH* compat 0x04000000
+[2026-02-18T13:25:18.863Z] debug1: Authenticating to ****:22 as 'ubuntu'
+[2026-02-18T13:25:18.863Z] debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+[2026-02-18T13:25:18.863Z] debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+[2026-02-18T13:25:18.863Z] debug1: SSH2_MSG_KEXINIT sent
+[2026-02-18T13:25:18.863Z] debug1: SSH2_MSG_KEXINIT received
+[2026-02-18T13:25:18.863Z] debug1: kex: algorithm: curve25519-sha256
+[2026-02-18T13:25:18.863Z] debug1: kex: host key algorithm: ssh-ed25519
+[2026-02-18T13:25:18.863Z] debug1: kex: server->client cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+[2026-02-18T13:25:18.863Z] debug1: kex: client->server cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+[2026-02-18T13:25:18.863Z] debug1: expecting SSH2_MSG_KEX_ECDH_REPLY
+[2026-02-18T13:25:18.863Z] debug1: SSH2_MSG_KEX_ECDH_REPLY received
+[2026-02-18T13:25:18.863Z] debug1: Server host key: ssh-ed25519 SHA256:mSj/H9UyK077Oy478H6wMNhilkMV6UZBQXVpkhml5fk
+[2026-02-18T13:25:18.863Z] debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+[2026-02-18T13:25:18.863Z] debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+[2026-02-18T13:25:18.863Z] Warning: Permanently added **** (ED25519) to the list of known hosts.
+[2026-02-18T13:25:18.863Z] debug1: ssh_packet_send2_wrapped: resetting send seqnr 3
+[2026-02-18T13:25:18.863Z] debug1: rekey out after 134217728 blocks
+[2026-02-18T13:25:18.863Z] debug1: SSH2_MSG_NEWKEYS sent
+[2026-02-18T13:25:18.863Z] debug1: expecting SSH2_MSG_NEWKEYS
+[2026-02-18T13:25:18.863Z] debug1: ssh_packet_read_poll2: resetting read seqnr 3
+[2026-02-18T13:25:18.863Z] debug1: SSH2_MSG_NEWKEYS received
+[2026-02-18T13:25:18.863Z] debug1: rekey in after 134217728 blocks
+[2026-02-18T13:25:18.863Z] debug1: Will attempt key: ****  explicit
+[2026-02-18T13:25:18.863Z] debug1: SSH2_MSG_EXT_INFO received
+[2026-02-18T13:25:18.863Z] debug1: kex_input_ext_info: server-sig-algs=<ssh-ed25519,sk-ssh-ed25519@openssh.com,ssh-rsa,rsa-sha2-256,rsa-sha2-512,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ecdsa-sha2-nistp256@openssh.com,webauthn-sk-ecdsa-sha2-nistp256@openssh.com>
+[2026-02-18T13:25:18.863Z] debug1: kex_input_ext_info: publickey-hostbound@openssh.com=<0>
+[2026-02-18T13:25:18.863Z] debug1: SSH2_MSG_SERVICE_ACCEPT received
+[2026-02-18T13:25:18.863Z] debug1: Authentications that can continue: publickey
+[2026-02-18T13:25:18.863Z] debug1: Next authentication method: publickey
+[2026-02-18T13:25:18.863Z] debug1: Trying private key: ****
+[2026-02-18T13:25:18.863Z] Authenticated to **** ([****]:22) using "publickey".
+[2026-02-18T13:25:18.863Z] debug1: channel 0: new [client-session]
+[2026-02-18T13:25:18.863Z] debug1: Requesting no-more-sessions@openssh.com
+[2026-02-18T13:25:18.863Z] debug1: Entering interactive session.
+[2026-02-18T13:25:18.863Z] debug1: pledge: network
+[2026-02-18T13:25:18.863Z] debug1: client_input_global_request: rtype hostkeys-00@openssh.com want_reply 0
+[2026-02-18T13:25:18.863Z] debug1: Remote: /home/ubuntu/.ssh/authorized_keys:1: key options: agent-forwarding port-forwarding pty user-rc x11-forwarding
+[2026-02-18T13:25:19.119Z] debug1: Sending environment.
+[2026-02-18T13:25:19.119Z] debug1: channel 0: setting env LANG = "C.UTF-8"
+[2026-02-18T13:25:19.119Z] debug1: Sending command: bash -s
+[2026-02-18T13:25:19.119Z] + cd /opt/notes-app
+[2026-02-18T13:25:19.119Z] + aws ecr get-login-password --region ****
+[2026-02-18T13:25:19.119Z] + docker login --username AWS --password-stdin ****
+[2026-02-18T13:25:20.485Z] Login Succeeded
+[2026-02-18T13:25:20.485Z] 
+[2026-02-18T13:25:20.485Z] WARNING! Your credentials are stored unencrypted in '/home/ubuntu/.docker/config.json'.
+[2026-02-18T13:25:20.485Z] Configure a credential helper to remove this warning. See
+[2026-02-18T13:25:20.485Z] https://docs.docker.com/go/credential-store/
+[2026-02-18T13:25:20.485Z] 
+[2026-02-18T13:25:20.485Z] + docker compose -f docker-compose.ecr.yml pull
+[2026-02-18T13:25:20.486Z]  Image ****/notes-frontend:latest Pulling 
+[2026-02-18T13:25:20.486Z]  Image public.ecr.aws/docker/library/postgres:15-alpine Pulling 
+[2026-02-18T13:25:20.486Z]  Image ****/notes-backend:latest Pulling 
+[2026-02-18T13:25:20.486Z]  Image ****/notes-proxy:latest Pulling 
+[2026-02-18T13:25:20.741Z]  4f4fb700ef54 Pulling fs layer 
+[2026-02-18T13:25:20.741Z]  589002ba0eae Pulling fs layer 
+[2026-02-18T13:25:20.741Z]  ad6d96c196e3 Pulling fs layer 
+[2026-02-18T13:25:20.741Z]  eb87f4721c91 Pulling fs layer 
+[2026-02-18T13:25:20.741Z]  e31b20165522 Pulling fs layer 
+[2026-02-18T13:25:20.741Z]  bcd86ab121b1 Pulling fs layer 
+[2026-02-18T13:25:20.741Z]  9dd1e764a28f Pulling fs layer 
+[2026-02-18T13:25:20.741Z]  0a5dc8d805c3 Pulling fs layer 
+[2026-02-18T13:25:20.741Z]  daac4bdc05b1 Pulling fs layer 
+[2026-02-18T13:25:20.741Z]  0ba6bf64c586 Pulling fs layer 
+[2026-02-18T13:25:20.741Z]  e1bed480603a Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  4f4fb700ef54 Downloading [==================================================>]      32B/32B
+[2026-02-18T13:25:20.997Z]  4f4fb700ef54 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  589002ba0eae Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  0bd6119897d4 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  de38229dbff9 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  4d72988b5ed7 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  3478b55c02c9 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  ad6d96c196e3 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  35a819d48155 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  eb87f4721c91 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  e31b20165522 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  4b721856b122 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  bcd86ab121b1 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  89e4267fee10 Pulling fs layer 
+[2026-02-18T13:25:20.997Z]  e31b20165522 Download complete 
+[2026-02-18T13:25:20.997Z]  9dd1e764a28f Download complete 
+[2026-02-18T13:25:20.997Z]  e1bed480603a Download complete 
+[2026-02-18T13:25:20.997Z]  bcd86ab121b1 Download complete 
+[2026-02-18T13:25:20.997Z]  589002ba0eae Downloading [=============>                                     ]  1.049MB/3.862MB
+[2026-02-18T13:25:20.997Z]  bcd86ab121b1 Download complete 
+[2026-02-18T13:25:20.997Z]  0a5dc8d805c3 Download complete 
+[2026-02-18T13:25:20.997Z]  daac4bdc05b1 Downloading [========>                                          ]  2.097MB/12.8MB
+[2026-02-18T13:25:20.997Z]  0ba6bf64c586 Download complete 
+[2026-02-18T13:25:20.997Z]  4f4fb700ef54 Download complete 
+[2026-02-18T13:25:20.997Z]  589002ba0eae Downloading [=============>                                     ]  1.049MB/3.862MB
+[2026-02-18T13:25:20.997Z]  e31b20165522 Download complete 
+[2026-02-18T13:25:20.997Z]  4f4fb700ef54 Download complete 
+[2026-02-18T13:25:21.253Z]  0bd6119897d4 Downloading [==================================================>]     114B/114B
+[2026-02-18T13:25:21.253Z]  589002ba0eae Downloading [==================================================>]  3.862MB/3.862MB
+[2026-02-18T13:25:21.253Z]  de38229dbff9 Downloading [==================================================>]     149B/149B
+[2026-02-18T13:25:21.253Z]  ad6d96c196e3 Downloading [======>                                            ]  5.243MB/42.78MB
+[2026-02-18T13:25:21.253Z]  589002ba0eae Downloading [==================================================>]  3.862MB/3.862MB
+[2026-02-18T13:25:21.253Z]  ad6d96c196e3 Downloading [=======>                                           ]  6.291MB/42.78MB
+[2026-02-18T13:25:21.253Z]  eb87f4721c91 Download complete 
+[2026-02-18T13:25:21.253Z]  eb87f4721c91 Download complete 
+[2026-02-18T13:25:21.253Z]  daac4bdc05b1 Downloading [================================>                  ]  8.389MB/12.8MB
+[2026-02-18T13:25:21.253Z]  daac4bdc05b1 Downloading [=================================================> ]  12.58MB/12.8MB
+[2026-02-18T13:25:21.253Z]  589002ba0eae Download complete 
+[2026-02-18T13:25:21.253Z]  de38229dbff9 Downloading [==================================================>]     149B/149B
+[2026-02-18T13:25:21.254Z]  4d72988b5ed7 Downloading [==================================================>]     122B/122B
+[2026-02-18T13:25:21.254Z]  ad6d96c196e3 Downloading [============>                                      ]  10.49MB/42.78MB
+[2026-02-18T13:25:21.254Z]  35a819d48155 Downloading [==================================================>]  194.8kB/194.8kB
+[2026-02-18T13:25:21.254Z]  89e4267fee10 Downloading [==================================================>]      93B/93B
+[2026-02-18T13:25:21.254Z]  4b721856b122 Downloading [==================================================>]     972B/972B
+[2026-02-18T13:25:21.254Z]  589002ba0eae Download complete 
+[2026-02-18T13:25:21.254Z]  ad6d96c196e3 Downloading [============>                                      ]  10.49MB/42.78MB
+[2026-02-18T13:25:21.254Z]  0bd6119897d4 Download complete 
+[2026-02-18T13:25:21.254Z]  3478b55c02c9 Downloading [===================>                               ]  2.097MB/5.367MB
+[2026-02-18T13:25:21.254Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.254Z]  e6ef242c1570 Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  4abcf2066143 Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  fc21a1d387f5 Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  d4bca490e609 Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  13fcfbc94648 Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  5406ed7b06d9 Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  452470029c53 Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  8a3742a9529d Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  9fc545722c5e Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  0d0c16747d2c Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  6853607a85cd Pulling fs layer 
+[2026-02-18T13:25:21.254Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.254Z]  ad6d96c196e3 Downloading [==================>                                ]  15.73MB/42.78MB
+[2026-02-18T13:25:21.254Z]  de38229dbff9 Download complete 
+[2026-02-18T13:25:21.254Z]  4d72988b5ed7 Download complete 
+[2026-02-18T13:25:21.254Z]  ad6d96c196e3 Downloading [==================>                                ]  15.73MB/42.78MB
+[2026-02-18T13:25:21.254Z]  35a819d48155 Download complete 
+[2026-02-18T13:25:21.254Z]  daac4bdc05b1 Download complete 
+[2026-02-18T13:25:21.254Z]  89e4267fee10 Download complete 
+[2026-02-18T13:25:21.254Z]  4b721856b122 Download complete 
+[2026-02-18T13:25:21.254Z]  3478b55c02c9 Downloading [==================================================>]  5.367MB/5.367MB
+[2026-02-18T13:25:21.254Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.254Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.540Z]  ad6d96c196e3 Downloading [==========================>                        ]  23.07MB/42.78MB
+[2026-02-18T13:25:21.540Z]  3478b55c02c9 Downloading [==================================================>]  5.367MB/5.367MB
+[2026-02-18T13:25:21.540Z]  b84388b949f0 Downloading [==================================================>]  1.439kB/1.439kB
+[2026-02-18T13:25:21.540Z]  ad6d96c196e3 Downloading [==========================>                        ]  23.07MB/42.78MB
+[2026-02-18T13:25:21.540Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.540Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.540Z]  ad6d96c196e3 Downloading [===============================>                   ]  27.26MB/42.78MB
+[2026-02-18T13:25:21.540Z]  b84388b949f0 Downloading [==================================================>]  1.439kB/1.439kB
+[2026-02-18T13:25:21.541Z]  ad6d96c196e3 Downloading [===============================>                   ]  27.26MB/42.78MB
+[2026-02-18T13:25:21.541Z]  fc21a1d387f5 Downloading [=============>                                     ]  1.049MB/3.985MB
+[2026-02-18T13:25:21.541Z]  3478b55c02c9 Downloading [==================================================>]  5.367MB/5.367MB
+[2026-02-18T13:25:21.541Z]  6853607a85cd Downloading [==================================================>]   1.81kB/1.81kB
+[2026-02-18T13:25:21.541Z]  3ba10497fe9d Downloading [==================================================>]  1.434kB/1.434kB
+[2026-02-18T13:25:21.541Z]  e6ef242c1570 Downloading [==================================================>]     629B/629B
+[2026-02-18T13:25:21.541Z]  d4bca490e609 Downloading [==================================================>]     393B/393B
+[2026-02-18T13:25:21.541Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.541Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.541Z]  b84388b949f0 Downloading [==================================================>]  1.439kB/1.439kB
+[2026-02-18T13:25:21.541Z]  ad6d96c196e3 Downloading [===================================>               ]  30.41MB/42.78MB
+[2026-02-18T13:25:21.541Z]  e6ef242c1570 Downloading [==================================================>]     629B/629B
+[2026-02-18T13:25:21.541Z]  d4bca490e609 Downloading [==================================================>]     393B/393B
+[2026-02-18T13:25:21.541Z]  5406ed7b06d9 Downloading [==================================================>]  1.209kB/1.209kB
+[2026-02-18T13:25:21.541Z]  4abcf2066143 Downloading [==================================================>]  3.409MB/3.409MB
+[2026-02-18T13:25:21.542Z]  fc21a1d387f5 Downloading [==================================================>]  3.985MB/3.985MB
+[2026-02-18T13:25:21.542Z]  13fcfbc94648 Downloading [==================================================>]     954B/954B
+[2026-02-18T13:25:21.542Z]  452470029c53 Downloading [==================================================>]     770B/770B
+[2026-02-18T13:25:21.542Z]  6853607a85cd Downloading [==================================================>]   1.81kB/1.81kB
+[2026-02-18T13:25:21.542Z]  3ba10497fe9d Downloading [==================================================>]  1.434kB/1.434kB
+[2026-02-18T13:25:21.542Z]  ad6d96c196e3 Downloading [====================================>              ]  31.46MB/42.78MB
+[2026-02-18T13:25:21.542Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.542Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.798Z]  4abcf2066143 Downloading [==================================================>]  3.409MB/3.409MB
+[2026-02-18T13:25:21.798Z]  fc21a1d387f5 Downloading [==================================================>]  3.985MB/3.985MB
+[2026-02-18T13:25:21.798Z]  13fcfbc94648 Downloading [==================================================>]     954B/954B
+[2026-02-18T13:25:21.798Z]  452470029c53 Downloading [==================================================>]     770B/770B
+[2026-02-18T13:25:21.798Z]  ad6d96c196e3 Downloading [==========================================>        ]   36.7MB/42.78MB
+[2026-02-18T13:25:21.798Z]  c58a629c30d6 Downloading [==================================================>]  1.443kB/1.443kB
+[2026-02-18T13:25:21.798Z]  ad6d96c196e3 Downloading [==========================================>        ]   36.7MB/42.78MB
+[2026-02-18T13:25:21.798Z]  9fc545722c5e Download complete 
+[2026-02-18T13:25:21.798Z]  6853607a85cd Downloading [==================================================>]   1.81kB/1.81kB
+[2026-02-18T13:25:21.799Z]  0d0c16747d2c Downloading [=====>                                             ]  1.561MB/13.04MB
+[2026-02-18T13:25:21.799Z]  3ba10497fe9d Download complete 
+[2026-02-18T13:25:21.799Z]  b84388b949f0 Download complete 
+[2026-02-18T13:25:21.799Z]  3478b55c02c9 Download complete 
+[2026-02-18T13:25:21.799Z]  e6ef242c1570 Download complete 
+[2026-02-18T13:25:21.799Z]  d4bca490e609 Downloading [==================================================>]     393B/393B
+[2026-02-18T13:25:21.799Z]  5406ed7b06d9 Downloading [==================================================>]  1.209kB/1.209kB
+[2026-02-18T13:25:21.799Z]  8a3742a9529d Downloading [==================================================>]  1.398kB/1.398kB
+[2026-02-18T13:25:21.799Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.799Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.799Z]  ad6d96c196e3 Downloading [===============================================>   ]  40.89MB/42.78MB
+[2026-02-18T13:25:21.799Z]  ad6d96c196e3 Downloading [===============================================>   ]  40.89MB/42.78MB
+[2026-02-18T13:25:21.799Z]  c58a629c30d6 Downloading [==================================================>]  1.443kB/1.443kB
+[2026-02-18T13:25:21.799Z]  4abcf2066143 Download complete 
+[2026-02-18T13:25:21.799Z]  fc21a1d387f5 Download complete 
+[2026-02-18T13:25:21.799Z]  13fcfbc94648 Download complete 
+[2026-02-18T13:25:21.799Z]  452470029c53 Download complete 
+[2026-02-18T13:25:21.799Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:21.799Z]  6853607a85cd Download complete 
+[2026-02-18T13:25:21.799Z]  0d0c16747d2c Downloading [========================>                          ]  6.291MB/13.04MB
+[2026-02-18T13:25:21.799Z]  d4bca490e609 Download complete 
+[2026-02-18T13:25:21.799Z]  5406ed7b06d9 Download complete 
+[2026-02-18T13:25:21.799Z]  8a3742a9529d Download complete 
+[2026-02-18T13:25:21.799Z]  4abcf2066143 Extracting 1 s
+[2026-02-18T13:25:21.799Z]  589002ba0eae Pull complete 
+[2026-02-18T13:25:21.799Z]  ad6d96c196e3 Downloading [==================================================>]  42.78MB/42.78MB
+[2026-02-18T13:25:21.799Z]  c58a629c30d6 Download complete 
+[2026-02-18T13:25:21.799Z]  ad6d96c196e3 Downloading [==================================================>]  42.78MB/42.78MB
+[2026-02-18T13:25:21.799Z]  0d0c16747d2c Downloading [============================================>      ]  11.53MB/13.04MB
+[2026-02-18T13:25:22.055Z]  4abcf2066143 Extracting 1 s
+[2026-02-18T13:25:22.055Z]  589002ba0eae Extracting 1 s
+[2026-02-18T13:25:22.055Z]  ad6d96c196e3 Download complete 
+[2026-02-18T13:25:22.055Z]  ad6d96c196e3 Download complete 
+[2026-02-18T13:25:22.055Z]  0d0c16747d2c Download complete 
+[2026-02-18T13:25:22.055Z]  4abcf2066143 Extracting 1 s
+[2026-02-18T13:25:22.055Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.055Z]  4abcf2066143 Extracting 1 s
+[2026-02-18T13:25:22.055Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.055Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.311Z]  4abcf2066143 Extracting 1 s
+[2026-02-18T13:25:22.311Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.311Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.311Z]  4abcf2066143 Pull complete 
+[2026-02-18T13:25:22.311Z]  fc21a1d387f5 Extracting 1 s
+[2026-02-18T13:25:22.311Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.311Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.567Z]  e2808358fab6 Pulling fs layer 
+[2026-02-18T13:25:22.567Z]  1cc5032597da Pulling fs layer 
+[2026-02-18T13:25:22.567Z]  22021ae8a283 Pulling fs layer 
+[2026-02-18T13:25:22.567Z]  2b183e31c9f8 Pulling fs layer 
+[2026-02-18T13:25:22.567Z]  8b6feeda4732 Pulling fs layer 
+[2026-02-18T13:25:22.567Z]  fbd2333a8b2e Pulling fs layer 
+[2026-02-18T13:25:22.567Z]  d9fee99ceaeb Pulling fs layer 
+[2026-02-18T13:25:22.567Z]  2af348483d54 Pulling fs layer 
+[2026-02-18T13:25:22.567Z]  6385d21b1497 Pulling fs layer 
+[2026-02-18T13:25:22.567Z]  49d5e74d1649 Pulling fs layer 
+[2026-02-18T13:25:22.567Z]  fc21a1d387f5 Extracting 1 s
+[2026-02-18T13:25:22.567Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.567Z]  fc21a1d387f5 Extracting 1 s
+[2026-02-18T13:25:22.567Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.567Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.567Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.567Z]  e2808358fab6 Download complete 
+[2026-02-18T13:25:22.567Z]  1cc5032597da Download complete 
+[2026-02-18T13:25:22.567Z]  fc21a1d387f5 Extracting 1 s
+[2026-02-18T13:25:22.567Z]  1cc5032597da Extracting 1 s
+[2026-02-18T13:25:22.567Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.567Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.823Z]  2b183e31c9f8 Downloading [==================================================>]     172B/172B
+[2026-02-18T13:25:22.823Z]  1cc5032597da Extracting 1 s
+[2026-02-18T13:25:22.823Z]  fc21a1d387f5 Extracting 1 s
+[2026-02-18T13:25:22.823Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.823Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.823Z]  2b183e31c9f8 Download complete 
+[2026-02-18T13:25:22.823Z]  fbd2333a8b2e Downloading [>                                                  ]  835.6kB/104.4MB
+[2026-02-18T13:25:22.823Z]  2af348483d54 Downloading [==================================================>]     128B/128B
+[2026-02-18T13:25:22.823Z]  8b6feeda4732 Download complete 
+[2026-02-18T13:25:22.823Z]  d9fee99ceaeb Download complete 
+[2026-02-18T13:25:22.823Z]  22021ae8a283 Download complete 
+[2026-02-18T13:25:22.823Z]  fc21a1d387f5 Extracting 1 s
+[2026-02-18T13:25:22.823Z]  1cc5032597da Extracting 1 s
+[2026-02-18T13:25:22.823Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.823Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:22.823Z]  2af348483d54 Download complete 
+[2026-02-18T13:25:22.823Z]  6385d21b1497 Download complete 
+[2026-02-18T13:25:22.823Z]  fc21a1d387f5 Pull complete 
+[2026-02-18T13:25:22.823Z]  49d5e74d1649 Download complete 
+[2026-02-18T13:25:22.823Z]  fbd2333a8b2e Downloading [==>                                                ]  5.243MB/104.4MB
+[2026-02-18T13:25:22.824Z]  1cc5032597da Pull complete 
+[2026-02-18T13:25:23.079Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:23.079Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:23.079Z]  fbd2333a8b2e Downloading [====>                                              ]  9.437MB/104.4MB
+[2026-02-18T13:25:23.079Z]  e6ef242c1570 Pull complete 
+[2026-02-18T13:25:23.079Z]  22021ae8a283 Extracting 1 s
+[2026-02-18T13:25:23.079Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.079Z]  ad6d96c196e3 Extracting 1 s
+[2026-02-18T13:25:23.079Z]  9543e0459960 Download complete 
+[2026-02-18T13:25:23.079Z]  13fcfbc94648 Pull complete 
+[2026-02-18T13:25:23.079Z]  fbd2333a8b2e Downloading [======>                                            ]  12.58MB/104.4MB
+[2026-02-18T13:25:23.079Z]  d4bca490e609 Extracting 1 s
+[2026-02-18T13:25:23.079Z]  22021ae8a283 Pull complete 
+[2026-02-18T13:25:23.079Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.079Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.336Z]  fbd2333a8b2e Downloading [========>                                          ]  16.78MB/104.4MB
+[2026-02-18T13:25:23.336Z]  19681da0b740 Download complete 
+[2026-02-18T13:25:23.336Z]  2b183e31c9f8 Extracting 1 s
+[2026-02-18T13:25:23.336Z]  d4bca490e609 Pull complete 
+[2026-02-18T13:25:23.336Z]  5406ed7b06d9 Extracting 1 s
+[2026-02-18T13:25:23.336Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.336Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.336Z]  fbd2333a8b2e Downloading [=========>                                         ]  19.92MB/104.4MB
+[2026-02-18T13:25:23.336Z]  2b183e31c9f8 Pull complete 
+[2026-02-18T13:25:23.336Z]  8b6feeda4732 Pull complete 
+[2026-02-18T13:25:23.336Z]  5406ed7b06d9 Pull complete 
+[2026-02-18T13:25:23.336Z]  8a3742a9529d Pull complete 
+[2026-02-18T13:25:23.336Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.336Z]  fbd2333a8b2e Downloading [===========>                                       ]  24.12MB/104.4MB
+[2026-02-18T13:25:23.336Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.593Z]  0d0c16747d2c Extracting 1 s
+[2026-02-18T13:25:23.593Z]  fbd2333a8b2e Downloading [=============>                                     ]  27.26MB/104.4MB
+[2026-02-18T13:25:23.593Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.593Z]  0d0c16747d2c Extracting 1 s
+[2026-02-18T13:25:23.593Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.593Z]  fbd2333a8b2e Downloading [===============>                                   ]  32.51MB/104.4MB
+[2026-02-18T13:25:23.593Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.593Z]  0d0c16747d2c Extracting 1 s
+[2026-02-18T13:25:23.848Z]  fbd2333a8b2e Downloading [==================>                                ]  37.75MB/104.4MB
+[2026-02-18T13:25:23.848Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.848Z]  0d0c16747d2c Extracting 1 s
+[2026-02-18T13:25:23.848Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.848Z]  fbd2333a8b2e Downloading [===================>                               ]  40.89MB/104.4MB
+[2026-02-18T13:25:23.848Z]  0d0c16747d2c Extracting 1 s
+[2026-02-18T13:25:23.848Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.848Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:23.849Z]  fbd2333a8b2e Downloading [======================>                            ]  46.14MB/104.4MB
+[2026-02-18T13:25:24.105Z]  0d0c16747d2c Extracting 1 s
+[2026-02-18T13:25:24.105Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:24.105Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:24.105Z]  fbd2333a8b2e Downloading [========================>                          ]  51.38MB/104.4MB
+[2026-02-18T13:25:24.105Z]  0d0c16747d2c Extracting 1 s
+[2026-02-18T13:25:24.105Z]  ad6d96c196e3 Extracting 2 s
+[2026-02-18T13:25:24.105Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.105Z]  fbd2333a8b2e Downloading [==========================>                        ]  54.53MB/104.4MB
+[2026-02-18T13:25:24.105Z]  0d0c16747d2c Extracting 1 s
+[2026-02-18T13:25:24.361Z]  fbd2333a8b2e Downloading [============================>                      ]  59.77MB/104.4MB
+[2026-02-18T13:25:24.361Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.361Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.361Z]  0d0c16747d2c Extracting 1 s
+[2026-02-18T13:25:24.361Z]  fbd2333a8b2e Downloading [==============================>                    ]  62.91MB/104.4MB
+[2026-02-18T13:25:24.361Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.361Z]  0d0c16747d2c Extracting 1 s
+[2026-02-18T13:25:24.361Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.361Z]  fbd2333a8b2e Downloading [================================>                  ]  67.11MB/104.4MB
+[2026-02-18T13:25:24.616Z]  0d0c16747d2c Extracting 2 s
+[2026-02-18T13:25:24.616Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.616Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.616Z]  fbd2333a8b2e Downloading [=================================>                 ]  69.21MB/104.4MB
+[2026-02-18T13:25:24.617Z]  0d0c16747d2c Extracting 2 s
+[2026-02-18T13:25:24.617Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.617Z]  fbd2333a8b2e Downloading [==================================>                ]  72.35MB/104.4MB
+[2026-02-18T13:25:24.617Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.617Z]  0d0c16747d2c Extracting 2 s
+[2026-02-18T13:25:24.617Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.617Z]  fbd2333a8b2e Downloading [====================================>              ]   75.5MB/104.4MB
+[2026-02-18T13:25:24.873Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.873Z]  0d0c16747d2c Extracting 2 s
+[2026-02-18T13:25:24.873Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.873Z]  fbd2333a8b2e Downloading [======================================>            ]  80.74MB/104.4MB
+[2026-02-18T13:25:24.873Z]  0d0c16747d2c Pull complete 
+[2026-02-18T13:25:24.873Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.873Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.873Z]  fbd2333a8b2e Downloading [========================================>          ]  85.21MB/104.4MB
+[2026-02-18T13:25:24.873Z]  9fc545722c5e Pull complete 
+[2026-02-18T13:25:24.873Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.873Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:24.873Z]  6853607a85cd Extracting 1 s
+[2026-02-18T13:25:25.129Z]  fbd2333a8b2e Downloading [===========================================>       ]  90.18MB/104.4MB
+[2026-02-18T13:25:25.129Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:25.129Z]  6853607a85cd Pull complete 
+[2026-02-18T13:25:25.129Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:25.129Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.129Z]  fbd2333a8b2e Downloading [=============================================>     ]  94.37MB/104.4MB
+[2026-02-18T13:25:25.129Z]  452470029c53 Pull complete 
+[2026-02-18T13:25:25.129Z]  ad6d96c196e3 Extracting 3 s
+[2026-02-18T13:25:25.129Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.129Z]  fbd2333a8b2e Downloading [===============================================>   ]  98.57MB/104.4MB
+[2026-02-18T13:25:25.385Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.385Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.385Z]  Image ****/notes-proxy:latest Pulled 
+[2026-02-18T13:25:25.385Z]  fbd2333a8b2e Downloading [=================================================> ]  102.8MB/104.4MB
+[2026-02-18T13:25:25.385Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.385Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.385Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.385Z]  fbd2333a8b2e Download complete 
+[2026-02-18T13:25:25.385Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:25.385Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.385Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.641Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:25.641Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.641Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.641Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:25.641Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.641Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.641Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:25.641Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.641Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.897Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:25.897Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.897Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.897Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:25.897Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:25.897Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:26.154Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:26.154Z]  ad6d96c196e3 Extracting 4 s
+[2026-02-18T13:25:26.154Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.154Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:26.154Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.154Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.154Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:26.154Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.154Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.410Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:26.410Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.410Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.410Z]  fbd2333a8b2e Extracting 1 s
+[2026-02-18T13:25:26.410Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.410Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.666Z]  fbd2333a8b2e Extracting 2 s
+[2026-02-18T13:25:26.666Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.666Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.666Z]  fbd2333a8b2e Extracting 2 s
+[2026-02-18T13:25:26.666Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.666Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.666Z]  fbd2333a8b2e Extracting 2 s
+[2026-02-18T13:25:26.666Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.666Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.922Z]  fbd2333a8b2e Extracting 2 s
+[2026-02-18T13:25:26.922Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.922Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.922Z]  fbd2333a8b2e Extracting 2 s
+[2026-02-18T13:25:26.922Z]  ad6d96c196e3 Extracting 5 s
+[2026-02-18T13:25:26.922Z]  ad6d96c196e3 Pull complete 
+[2026-02-18T13:25:26.922Z]  eb87f4721c91 Extracting 1 s
+[2026-02-18T13:25:27.177Z]  fbd2333a8b2e Extracting 2 s
+[2026-02-18T13:25:27.177Z]  ad6d96c196e3 Extracting 6 s
+[2026-02-18T13:25:27.177Z]  eb87f4721c91 Extracting 1 s
+[2026-02-18T13:25:27.177Z]  fbd2333a8b2e Extracting 2 s
+[2026-02-18T13:25:27.177Z]  bcd86ab121b1 Extracting 1 s
+[2026-02-18T13:25:27.177Z]  e31b20165522 Pull complete 
+[2026-02-18T13:25:27.177Z]  eb87f4721c91 Pull complete 
+[2026-02-18T13:25:27.177Z]  fbd2333a8b2e Extracting 2 s
+[2026-02-18T13:25:27.177Z]  eb87f4721c91 Extracting 1 s
+[2026-02-18T13:25:27.433Z]  bcd86ab121b1 Extracting 1 s
+[2026-02-18T13:25:27.433Z]  fbd2333a8b2e Extracting 2 s
+[2026-02-18T13:25:27.433Z]  bcd86ab121b1 Pull complete 
+[2026-02-18T13:25:27.433Z]  bcd86ab121b1 Extracting 1 s
+[2026-02-18T13:25:27.433Z]  89e4267fee10 Pull complete 
+[2026-02-18T13:25:27.433Z]  4b721856b122 Pull complete 
+[2026-02-18T13:25:27.433Z]  fbd2333a8b2e Extracting 2 s
+[2026-02-18T13:25:27.433Z]  0bd6119897d4 Pull complete 
+[2026-02-18T13:25:27.433Z]  de38229dbff9 Pull complete 
+[2026-02-18T13:25:27.433Z]  4d72988b5ed7 Extracting 1 s
+[2026-02-18T13:25:27.433Z]  9dd1e764a28f Pull complete 
+[2026-02-18T13:25:27.433Z]  0a5dc8d805c3 Pull complete 
+[2026-02-18T13:25:27.433Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:27.433Z]  fbd2333a8b2e Extracting 3 s
+[2026-02-18T13:25:27.689Z]  4d72988b5ed7 Pull complete 
+[2026-02-18T13:25:27.689Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:27.689Z]  fbd2333a8b2e Extracting 3 s
+[2026-02-18T13:25:27.689Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:27.689Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:27.689Z]  fbd2333a8b2e Extracting 3 s
+[2026-02-18T13:25:27.689Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:27.945Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:27.945Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:27.945Z]  fbd2333a8b2e Extracting 3 s
+[2026-02-18T13:25:27.945Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:27.945Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:27.945Z]  fbd2333a8b2e Extracting 3 s
+[2026-02-18T13:25:27.945Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:28.201Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:28.201Z]  fbd2333a8b2e Extracting 3 s
+[2026-02-18T13:25:28.201Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:28.201Z]  fbd2333a8b2e Extracting 3 s
+[2026-02-18T13:25:28.201Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:28.201Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:28.201Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:28.201Z]  fbd2333a8b2e Extracting 3 s
+[2026-02-18T13:25:28.457Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:28.457Z]  fbd2333a8b2e Extracting 3 s
+[2026-02-18T13:25:28.457Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:28.457Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:28.457Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:28.457Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:28.457Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:28.457Z]  daac4bdc05b1 Extracting 1 s
+[2026-02-18T13:25:28.457Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:28.713Z]  3478b55c02c9 Extracting 1 s
+[2026-02-18T13:25:28.713Z]  daac4bdc05b1 Extracting 2 s
+[2026-02-18T13:25:28.713Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:28.713Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:28.713Z]  daac4bdc05b1 Extracting 2 s
+[2026-02-18T13:25:28.713Z]  35a819d48155 Pull complete 
+[2026-02-18T13:25:28.713Z]  3478b55c02c9 Pull complete 
+[2026-02-18T13:25:28.969Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:28.969Z]  4f4fb700ef54 Extracting 1 s
+[2026-02-18T13:25:28.969Z]  daac4bdc05b1 Extracting 2 s
+[2026-02-18T13:25:28.969Z]  4f4fb700ef54 Pull complete 
+[2026-02-18T13:25:28.969Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:28.969Z]  4f4fb700ef54 Pull complete 
+[2026-02-18T13:25:28.969Z]  daac4bdc05b1 Extracting 2 s
+[2026-02-18T13:25:28.969Z]  Image ****/notes-frontend:latest Pulled 
+[2026-02-18T13:25:28.969Z]  daac4bdc05b1 Extracting 2 s
+[2026-02-18T13:25:28.969Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:29.226Z]  daac4bdc05b1 Extracting 2 s
+[2026-02-18T13:25:29.226Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:29.226Z]  daac4bdc05b1 Extracting 2 s
+[2026-02-18T13:25:29.226Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:29.482Z]  daac4bdc05b1 Extracting 2 s
+[2026-02-18T13:25:29.482Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:29.482Z]  daac4bdc05b1 Extracting 2 s
+[2026-02-18T13:25:29.482Z]  fbd2333a8b2e Extracting 4 s
+[2026-02-18T13:25:29.482Z]  daac4bdc05b1 Extracting 2 s
+[2026-02-18T13:25:29.482Z]  fbd2333a8b2e Extracting 5 s
+[2026-02-18T13:25:29.738Z]  daac4bdc05b1 Extracting 3 s
+[2026-02-18T13:25:29.738Z]  fbd2333a8b2e Extracting 5 s
+[2026-02-18T13:25:29.738Z]  daac4bdc05b1 Extracting 3 s
+[2026-02-18T13:25:29.738Z]  fbd2333a8b2e Extracting 5 s
+[2026-02-18T13:25:29.738Z]  daac4bdc05b1 Extracting 3 s
+[2026-02-18T13:25:29.738Z]  fbd2333a8b2e Extracting 5 s
+[2026-02-18T13:25:29.994Z]  daac4bdc05b1 Extracting 3 s
+[2026-02-18T13:25:29.994Z]  fbd2333a8b2e Extracting 5 s
+[2026-02-18T13:25:29.994Z]  daac4bdc05b1 Extracting 3 s
+[2026-02-18T13:25:29.994Z]  fbd2333a8b2e Extracting 5 s
+[2026-02-18T13:25:30.250Z]  daac4bdc05b1 Extracting 3 s
+[2026-02-18T13:25:30.250Z]  fbd2333a8b2e Extracting 5 s
+[2026-02-18T13:25:30.250Z]  daac4bdc05b1 Extracting 3 s
+[2026-02-18T13:25:30.250Z]  fbd2333a8b2e Extracting 5 s
+[2026-02-18T13:25:30.250Z]  daac4bdc05b1 Extracting 3 s
+[2026-02-18T13:25:30.250Z]  fbd2333a8b2e Extracting 5 s
+[2026-02-18T13:25:30.506Z]  daac4bdc05b1 Extracting 3 s
+[2026-02-18T13:25:30.507Z]  fbd2333a8b2e Extracting 5 s
+[2026-02-18T13:25:30.507Z]  fbd2333a8b2e Extracting 6 s
+[2026-02-18T13:25:30.507Z]  daac4bdc05b1 Extracting 3 s
+[2026-02-18T13:25:30.763Z]  fbd2333a8b2e Extracting 6 s
+[2026-02-18T13:25:30.763Z]  daac4bdc05b1 Extracting 4 s
+[2026-02-18T13:25:30.763Z]  daac4bdc05b1 Extracting 4 s
+[2026-02-18T13:25:30.763Z]  fbd2333a8b2e Extracting 6 s
+[2026-02-18T13:25:30.763Z]  daac4bdc05b1 Extracting 4 s
+[2026-02-18T13:25:30.763Z]  fbd2333a8b2e Extracting 6 s
+[2026-02-18T13:25:31.019Z]  daac4bdc05b1 Extracting 4 s
+[2026-02-18T13:25:31.019Z]  fbd2333a8b2e Extracting 6 s
+[2026-02-18T13:25:31.019Z]  0ba6bf64c586 Pull complete 
+[2026-02-18T13:25:31.019Z]  daac4bdc05b1 Pull complete 
+[2026-02-18T13:25:31.019Z]  fbd2333a8b2e Extracting 6 s
+[2026-02-18T13:25:31.019Z]  e1bed480603a Pull complete 
+[2026-02-18T13:25:31.019Z]  Image ****/notes-backend:latest Pulled 
+[2026-02-18T13:25:31.019Z]  fbd2333a8b2e Extracting 6 s
+[2026-02-18T13:25:31.275Z]  fbd2333a8b2e Extracting 6 s
+[2026-02-18T13:25:31.275Z]  fbd2333a8b2e Extracting 6 s
+[2026-02-18T13:25:31.532Z]  fbd2333a8b2e Extracting 6 s
+[2026-02-18T13:25:31.532Z]  fbd2333a8b2e Extracting 7 s
+[2026-02-18T13:25:31.532Z]  fbd2333a8b2e Extracting 7 s
+[2026-02-18T13:25:31.787Z]  fbd2333a8b2e Extracting 7 s
+[2026-02-18T13:25:31.787Z]  fbd2333a8b2e Extracting 7 s
+[2026-02-18T13:25:32.043Z]  d9fee99ceaeb Pull complete 
+[2026-02-18T13:25:32.043Z]  fbd2333a8b2e Pull complete 
+[2026-02-18T13:25:32.043Z]  e2808358fab6 Pull complete 
+[2026-02-18T13:25:32.043Z]  2af348483d54 Pull complete 
+[2026-02-18T13:25:32.043Z]  6385d21b1497 Pull complete 
+[2026-02-18T13:25:32.043Z]  49d5e74d1649 Pull complete 
+[2026-02-18T13:25:32.043Z]  Image public.ecr.aws/docker/library/postgres:15-alpine Pulled 
+[2026-02-18T13:25:32.043Z] + docker compose -f docker-compose.ecr.yml up -d --remove-orphans
+[2026-02-18T13:25:32.299Z]  Network docker-lab-frontend-network Creating 
+[2026-02-18T13:25:32.299Z]  Network docker-lab-frontend-network Created 
+[2026-02-18T13:25:32.299Z]  Network docker-lab-backend-network Creating 
+[2026-02-18T13:25:32.299Z]  Network docker-lab-backend-network Created 
+[2026-02-18T13:25:32.299Z]  Volume docker-lab-postgres-data Creating 
+[2026-02-18T13:25:32.299Z]  Volume docker-lab-postgres-data Created 
+[2026-02-18T13:25:32.299Z]  Container notes-database Creating 
+[2026-02-18T13:25:32.556Z]  Container notes-database Created 
+[2026-02-18T13:25:32.556Z]  Container notes-backend Creating 
+[2026-02-18T13:25:32.812Z]  Container notes-backend Created 
+[2026-02-18T13:25:32.812Z]  Container notes-frontend Creating 
+[2026-02-18T13:25:32.812Z]  Container notes-frontend Created 
+[2026-02-18T13:25:32.812Z]  Container notes-proxy Creating 
+[2026-02-18T13:25:32.812Z]  Container notes-proxy Created 
+[2026-02-18T13:25:32.812Z]  Container notes-database Starting 
+[2026-02-18T13:25:33.068Z]  Container notes-database Started 
+[2026-02-18T13:25:33.068Z]  Container notes-database Waiting 
+[2026-02-18T13:25:39.604Z]  Container notes-database Healthy 
+[2026-02-18T13:25:39.604Z]  Container notes-backend Starting 
+[2026-02-18T13:25:39.604Z]  Container notes-backend Started 
+[2026-02-18T13:25:39.604Z]  Container notes-backend Waiting 
+[2026-02-18T13:25:44.857Z]  Container notes-backend Healthy 
+[2026-02-18T13:25:44.857Z]  Container notes-frontend Starting 
+[2026-02-18T13:25:44.857Z]  Container notes-frontend Started 
+[2026-02-18T13:25:44.857Z]  Container notes-frontend Waiting 
+[2026-02-18T13:25:44.857Z]  Container notes-backend Waiting 
+[2026-02-18T13:25:45.114Z]  Container notes-backend Healthy 
+[2026-02-18T13:25:50.357Z]  Container notes-frontend Healthy 
+[2026-02-18T13:25:50.357Z]  Container notes-proxy Starting 
+[2026-02-18T13:25:50.357Z]  Container notes-proxy Started 
+[2026-02-18T13:25:50.357Z] + docker image prune -f
+[2026-02-18T13:25:50.357Z] Total reclaimed space: 0B
+[2026-02-18T13:25:50.357Z] ✅ Deployment complete
+[2026-02-18T13:25:50.357Z] + echo '✅ Deployment complete'
+[2026-02-18T13:25:50.357Z] + docker compose -f docker-compose.ecr.yml ps
+[2026-02-18T13:25:50.357Z] NAME             IMAGE                                                                COMMAND                  SERVICE    CREATED          STATUS                                     PORTS
+[2026-02-18T13:25:50.358Z] notes-backend    ****/notes-backend:latest    "docker-entrypoint.s…"   backend    18 seconds ago   Up 11 seconds (healthy)                    3001/tcp
+[2026-02-18T13:25:50.358Z] notes-database   public.ecr.aws/docker/library/postgres:15-alpine                     "docker-entrypoint.s…"   database   18 seconds ago   Up 17 seconds (healthy)                    5432/tcp
+[2026-02-18T13:25:50.358Z] notes-frontend   ****/notes-frontend:latest   "docker-entrypoint.s…"   frontend   18 seconds ago   Up 5 seconds (healthy)                     3000/tcp
+[2026-02-18T13:25:50.358Z] notes-proxy      ****/notes-proxy:latest      "/docker-entrypoint.…"   proxy      18 seconds ago   Up Less than a second (health: starting)   0.0.0.0:80->80/tcp, [::]:80->80/tcp
+[2026-02-18T13:25:50.358Z] debug1: client_input_channel_req: channel 0 rtype exit-status reply 0
+[2026-02-18T13:25:50.358Z] debug1: channel 0: free: client-session, nchannels 1
+[2026-02-18T13:25:50.358Z] Transferred: sent 4060, received 38328 bytes, in 31.5 seconds
+[2026-02-18T13:25:50.358Z] Bytes per second: sent 128.9, received 1216.6
+[2026-02-18T13:25:50.358Z] debug1: Exit status 0
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Smoke Test)
+[Pipeline] echo
+[2026-02-18T13:25:51.059Z] 💨 Running smoke test against deployed application...
+[Pipeline] withCredentials
+[2026-02-18T13:25:51.143Z] Masking supported pattern matches of $EC2_HOST
+[Pipeline] {
+[Pipeline] sh
+[2026-02-18T13:25:51.334Z] Warning: A secret was passed to "sh" using Groovy String interpolation, which is insecure.
+[2026-02-18T13:25:51.334Z] 		 Affected argument(s) used the following variable(s): [EC2_HOST]
+[2026-02-18T13:25:51.334Z] 		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
+[2026-02-18T13:25:51.603Z] + echo Waiting 20s for containers to stabilise...
+[2026-02-18T13:25:51.603Z] Waiting 20s for containers to stabilise...
+[2026-02-18T13:25:51.603Z] + sleep 20
+[2026-02-18T13:26:13.485Z] + MAX_RETRIES=5
+[2026-02-18T13:26:13.485Z] + RETRY_DELAY=10
+[2026-02-18T13:26:13.486Z] + URL=http://****/
+[2026-02-18T13:26:13.486Z] + seq 1 5
+[2026-02-18T13:26:13.486Z] + curl -s -o /dev/null -w %{http_code} http://****/
+[2026-02-18T13:26:13.486Z] + HTTP_CODE=200
+[2026-02-18T13:26:13.486Z] + echo Attempt 1 — HTTP 200
+[2026-02-18T13:26:13.486Z] Attempt 1 — HTTP 200
+[2026-02-18T13:26:13.486Z] + echo 200 301 302
+[2026-02-18T13:26:13.486Z] + grep -qw 200
+[2026-02-18T13:26:13.486Z] + echo ✅ Smoke test passed (HTTP 200)
+[2026-02-18T13:26:13.486Z] ✅ Smoke test passed (HTTP 200)
+[2026-02-18T13:26:13.486Z] + exit 0
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] echo
+[2026-02-18T13:26:14.274Z] 🧹 Cleaning up workspace...
+[Pipeline] sh
+[2026-02-18T13:26:14.611Z] + docker images --format {{.Repository}}:{{.Tag}}
+[2026-02-18T13:26:14.611Z] + xargs -r docker rmi -f
+[2026-02-18T13:26:14.611Z] + grep -E notes-(backend|frontend|proxy)
+[2026-02-18T13:26:14.611Z] Untagged: 904570587823.dkr.ecr.eu-west-1.amazonaws.com/notes-proxy:6246005
+[2026-02-18T13:26:14.611Z] Untagged: 904570587823.dkr.ecr.eu-west-1.amazonaws.com/notes-proxy:latest
+[2026-02-18T13:26:14.611Z] Deleted: sha256:4a139ea6966ff7b1dcfeb35829771ed148c23031f597092af1a3efb256244d7a
+[2026-02-18T13:26:14.611Z] Untagged: 904570587823.dkr.ecr.eu-west-1.amazonaws.com/notes-frontend:6246005
+[2026-02-18T13:26:14.611Z] Untagged: 904570587823.dkr.ecr.eu-west-1.amazonaws.com/notes-frontend:latest
+[2026-02-18T13:26:14.611Z] Deleted: sha256:83fa22d16f671998f6aae0b5f507b4deb070dfd7f5fb491a37eb78964f3f2dac
+[2026-02-18T13:26:14.611Z] Untagged: 904570587823.dkr.ecr.eu-west-1.amazonaws.com/notes-backend:6246005
+[2026-02-18T13:26:14.867Z] Untagged: 904570587823.dkr.ecr.eu-west-1.amazonaws.com/notes-backend:latest
+[2026-02-18T13:26:14.867Z] Deleted: sha256:7f7837a7d385c2ec4691680307686c6bb2ee5d522c716fa556cfc4f61e35aa99
+[Pipeline] cleanWs
+[2026-02-18T13:26:14.972Z] [WS-CLEANUP] Deleting project workspace...
+[2026-02-18T13:26:14.972Z] [WS-CLEANUP] Deferred wipeout is used...
+[2026-02-18T13:26:14.998Z] [WS-CLEANUP] done
+[Pipeline] echo
+[2026-02-18T13:26:15.117Z] ✅ Pipeline succeeded!
+[Pipeline] script
+[Pipeline] {
+[Pipeline] slackSend
+[2026-02-18T13:26:15.351Z] Slack Send Pipeline step running, values are - baseUrl: <empty>, teamDomain: Amalitech-jenkins, channel: #ci-cd-alerts, color: good, botUser: false, tokenCredentialId: slack-token, notifyCommitters: false, iconEmoji: <empty>, username: <empty>, timestamp: <empty>
+[2026-02-18T13:26:15.351Z] ERROR: Slack notification failed with exception: java.lang.IllegalArgumentException: the credential with the provided ID (slack-token) could not be found and no token was specified
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[2026-02-18T13:26:15.844Z] 
+[Pipeline] // ansiColor
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // timestamps
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
