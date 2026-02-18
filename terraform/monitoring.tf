@@ -123,5 +123,6 @@ resource "aws_instance" "monitoring" {
     aws_key_pair.monitoring,
     # Ensure app server exists so its private IP is available for templatefile()
     aws_instance.notes_app,
+
   ]
 }
