@@ -56,8 +56,7 @@ pipeline {
     // -------------------------------------------------------------------------
     environment {
         // SonarCloud config (update these)
-        SONAR_ORGANIZATION = 'Prince
-'
+        SONAR_ORGANIZATION = 'Prince'
         SONAR_PROJECT_KEY  = 'celetrialprince166'
 
         // Slack config (update these)
