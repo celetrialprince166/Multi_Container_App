@@ -85,7 +85,8 @@ pipeline {
                     env.GIT_AUTHOR       = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
                     env.GIT_MESSAGE      = sh(script: "git log -1 --pretty=%s",  returnStdout: true).trim()
                     env.IMAGE_TAG        = env.GIT_COMMIT_SHORT
-                    echo "Branch   : ${env.BRANCH_NAME}"
+                    echo "Branch (env.BRANCH_NAME): ${env.BRANCH_NAME}"
+                    echo "Branch (env.GIT_BRANCH) : ${env.GIT_BRANCH}"
                     echo "Commit   : ${env.GIT_COMMIT_SHORT}"
                     echo "Author   : ${env.GIT_AUTHOR}"
                     echo "Message  : ${env.GIT_MESSAGE}"
