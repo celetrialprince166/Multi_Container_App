@@ -417,8 +417,13 @@ EOF
                             # Pull new images
                             docker compose -f docker-compose.ecr.yml pull
 
-                            # Zero-downtime rolling restart
-                            docker compose -f docker-compose.ecr.yml up -d --remove-orphans
+                            # Bring down existing containers cleanly before recreating
+                            # (required when log driver changes — Docker can't recreate
+                            # a container in-place if the driver config has changed)
+                            docker compose -f docker-compose.ecr.yml down --remove-orphans
+
+                            # Start fresh with new config
+                            docker compose -f docker-compose.ecr.yml up -d
 
                             # Clean up dangling images
                             docker image prune -f
