@@ -379,6 +379,9 @@ pipeline {
                     )
                 ]) {
                     sh """
+                        set -e
+                        set -x  # Enable debug output
+
                         # Write .env file
                         cat > .env <<EOF
 ECR_REGISTRY=${ECR_REGISTRY}
@@ -391,16 +394,19 @@ NEXT_PUBLIC_API_URL=http://${EC2_HOST}/api
 EOF
 
                         # Copy files to EC2
-                        scp -o StrictHostKeyChecking=no \
+                        echo "📂 Copying files to ${EC2_HOST}..."
+                        scp -v -o StrictHostKeyChecking=no \
                             -i \${SSH_KEY} \
                             .env docker-compose.ecr.yml \
                             \${SSH_USER}@${EC2_HOST}:/opt/notes-app/
 
                         # Remote deploy commands
-                        ssh -o StrictHostKeyChecking=no \
+                        echo "🚀 executing remote commands on ${EC2_HOST}..."
+                        ssh -v -o StrictHostKeyChecking=no \
                             -i \${SSH_KEY} \
                             \${SSH_USER}@${EC2_HOST} bash -s <<'REMOTE'
                             set -e
+                            set -x
                             cd /opt/notes-app
 
                             # ECR login on the remote host
