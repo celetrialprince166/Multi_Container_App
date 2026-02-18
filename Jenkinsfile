@@ -56,7 +56,7 @@ pipeline {
     // -------------------------------------------------------------------------
     environment {
         // SonarCloud config (update these)
-        SONAR_ORGANIZATION = 'Prince'
+        SONAR_ORGANIZATION = 'celetrialprince166'
         SONAR_PROJECT_KEY  = 'celetrialprince166'
 
         // Slack config (update these)
@@ -271,12 +271,13 @@ pipeline {
                 echo '🛡️  Scanning Docker images with Trivy...'
                 withCredentials([string(credentialsId: 'ecr-registry', variable: 'ECR_REGISTRY')]) {
                     script {
-                        // Install Trivy if not already present on the agent
+                        // Install Trivy to user-writable location
                         sh '''
-                            if ! command -v trivy &> /dev/null; then
-                                echo "Installing Trivy..."
+                            mkdir -p $HOME/bin
+                            if ! $HOME/bin/trivy --version &> /dev/null; then
+                                echo "Installing Trivy to \$HOME/bin..."
                                 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-                                    | sh -s -- -b /usr/local/bin
+                                    | sh -s -- -b $HOME/bin
                             fi
                         '''
 
@@ -289,7 +290,7 @@ pipeline {
                         images.each { img ->
                             echo "Scanning ${img.name} image..."
                             sh """
-                                trivy image \
+                                \$HOME/bin/trivy image \
                                     --exit-code 1 \
                                     --severity CRITICAL \
                                     --no-progress \
