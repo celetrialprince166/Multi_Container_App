@@ -396,14 +396,14 @@ EOF
                         # Copy files to EC2
                         echo "📂 Copying files to ${EC2_HOST}..."
                         scp -v -o StrictHostKeyChecking=no \
-                            -i \${SSH_KEY} \
+                            -i "\${SSH_KEY}" \
                             .env docker-compose.ecr.yml \
                             \${SSH_USER}@${EC2_HOST}:/opt/notes-app/
 
                         # Remote deploy commands
                         echo "🚀 executing remote commands on ${EC2_HOST}..."
                         ssh -v -o StrictHostKeyChecking=no \
-                            -i \${SSH_KEY} \
+                            -i "\${SSH_KEY}" \
                             \${SSH_USER}@${EC2_HOST} bash -s <<'REMOTE'
                             set -e
                             set -x
