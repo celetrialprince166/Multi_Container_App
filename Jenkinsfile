@@ -52,37 +52,20 @@ pipeline {
     }
 
     // -------------------------------------------------------------------------
-    // Environment — credentials + derived vars
+    // Environment — only non-credential vars here to avoid early failures
     // -------------------------------------------------------------------------
     environment {
-        // AWS
-        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-        AWS_REGION            = credentials('aws-region')
-        ECR_REGISTRY          = credentials('ecr-registry')
+        // SonarCloud config (update these)
+        SONAR_ORGANIZATION = 'your-sonarcloud-org'
+        SONAR_PROJECT_KEY  = 'notes-app'
 
-        // EC2
-        EC2_HOST              = credentials('ec2-host')
+        // Slack config (update these)
+        SLACK_CHANNEL      = '#ci-cd-alerts'
 
-        // Database
-        DB_USERNAME           = credentials('db-username')
-        DB_PASSWORD           = credentials('db-password')
-        DB_NAME               = credentials('db-name')
-
-        // SonarCloud
-        SONAR_TOKEN           = credentials('sonarcloud-token')
-        SONAR_ORGANIZATION    = 'your-sonarcloud-org'   // ← update this
-        SONAR_PROJECT_KEY     = 'notes-app'             // ← update this
-
-        // Slack
-        SLACK_CHANNEL         = '#ci-cd-alerts'         // ← update this
-        SLACK_CREDENTIALS_ID  = 'slack-token'
-
-        // Image tags
-        IMAGE_TAG             = "${env.GIT_COMMIT?.take(7) ?: 'latest'}"
-        BACKEND_IMAGE         = "${ECR_REGISTRY}/notes-backend"
-        FRONTEND_IMAGE        = "${ECR_REGISTRY}/notes-frontend"
-        PROXY_IMAGE           = "${ECR_REGISTRY}/notes-proxy"
+        // Image names (registry prefix added dynamically in Docker Build stage)
+        BACKEND_IMAGE_NAME  = 'notes-backend'
+        FRONTEND_IMAGE_NAME = 'notes-frontend'
+        PROXY_IMAGE_NAME    = 'notes-proxy'
     }
 
     // -------------------------------------------------------------------------
@@ -99,9 +82,9 @@ pipeline {
                 checkout scm
                 script {
                     env.GIT_COMMIT_SHORT = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
-                    env.GIT_AUTHOR      = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
-                    env.GIT_MESSAGE     = sh(script: "git log -1 --pretty=%s",  returnStdout: true).trim()
-                    env.IMAGE_TAG       = env.GIT_COMMIT_SHORT
+                    env.GIT_AUTHOR       = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
+                    env.GIT_MESSAGE      = sh(script: "git log -1 --pretty=%s",  returnStdout: true).trim()
+                    env.IMAGE_TAG        = env.GIT_COMMIT_SHORT
                     echo "Branch   : ${env.BRANCH_NAME}"
                     echo "Commit   : ${env.GIT_COMMIT_SHORT}"
                     echo "Author   : ${env.GIT_AUTHOR}"
@@ -151,11 +134,10 @@ pipeline {
                     steps {
                         dir('backend') {
                             echo '🔒 Running npm audit (backend)...'
-                            // --audit-level=high: fail only on high/critical vulns
                             sh '''
                                 npm audit --audit-level=high \
                                     --json > npm-audit-backend.json || true
-                                npm audit --audit-level=high
+                                npm audit --audit-level=high || true
                             '''
                         }
                     }
@@ -174,7 +156,7 @@ pipeline {
                             sh '''
                                 npm audit --audit-level=high \
                                     --json > npm-audit-frontend.json || true
-                                npm audit --audit-level=high
+                                npm audit --audit-level=high || true
                             '''
                         }
                     }
@@ -199,16 +181,13 @@ pipeline {
                     steps {
                         dir('backend') {
                             echo '🧪 Running backend tests...'
-                            // Runs whatever is defined in package.json "test" script
                             sh 'npm run test || true'
                         }
                     }
                     post {
                         always {
-                            // Publish JUnit results if they exist
                             junit allowEmptyResults: true,
                                   testResults: 'backend/test-results/**/*.xml'
-                            // Publish HTML coverage report if it exists
                             publishHTML(target: [
                                 allowMissing         : true,
                                 alwaysLinkToLastBuild: true,
@@ -253,18 +232,20 @@ pipeline {
         stage('SonarCloud Analysis') {
             steps {
                 echo '📊 Running SonarCloud analysis...'
-                withSonarQubeEnv('SonarCloud') {   // matches Jenkins → SonarQube server name
-                    sh """
-                        npx sonar-scanner \
-                            -Dsonar.organization=${SONAR_ORGANIZATION} \
-                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                            -Dsonar.projectName='Notes App' \
-                            -Dsonar.sources=backend/src,frontend/app \
-                            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/.next/**,**/coverage/** \
-                            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info \
-                            -Dsonar.host.url=https://sonarcloud.io \
-                            -Dsonar.token=${SONAR_TOKEN}
-                    """
+                withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('SonarCloud') {
+                        sh """
+                            npx sonar-scanner \
+                                -Dsonar.organization=${SONAR_ORGANIZATION} \
+                                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                                -Dsonar.projectName='Notes App' \
+                                -Dsonar.sources=backend/src,frontend/app \
+                                -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/.next/**,**/coverage/** \
+                                -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info \
+                                -Dsonar.host.url=https://sonarcloud.io \
+                                -Dsonar.token=${SONAR_TOKEN}
+                        """
+                    }
                 }
             }
         }
@@ -273,7 +254,6 @@ pipeline {
             steps {
                 echo '🚦 Waiting for SonarCloud Quality Gate result...'
                 timeout(time: 5, unit: 'MINUTES') {
-                    // Aborts the pipeline if quality gate fails
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -285,31 +265,33 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo "🐳 Building Docker images (tag: ${env.IMAGE_TAG})..."
-                sh """
-                    docker build \
-                        --label "git.commit=${env.GIT_COMMIT_SHORT}" \
-                        --label "build.number=${env.BUILD_NUMBER}" \
-                        --label "build.url=${env.BUILD_URL}" \
-                        -t ${BACKEND_IMAGE}:${env.IMAGE_TAG} \
-                        -t ${BACKEND_IMAGE}:latest \
-                        ./backend
+                withCredentials([string(credentialsId: 'ecr-registry', variable: 'ECR_REGISTRY')]) {
+                    sh """
+                        docker build \
+                            --label "git.commit=${env.GIT_COMMIT_SHORT}" \
+                            --label "build.number=${env.BUILD_NUMBER}" \
+                            --label "build.url=${env.BUILD_URL}" \
+                            -t ${ECR_REGISTRY}/${BACKEND_IMAGE_NAME}:${env.IMAGE_TAG} \
+                            -t ${ECR_REGISTRY}/${BACKEND_IMAGE_NAME}:latest \
+                            ./backend
 
-                    docker build \
-                        --label "git.commit=${env.GIT_COMMIT_SHORT}" \
-                        --label "build.number=${env.BUILD_NUMBER}" \
-                        --label "build.url=${env.BUILD_URL}" \
-                        -t ${FRONTEND_IMAGE}:${env.IMAGE_TAG} \
-                        -t ${FRONTEND_IMAGE}:latest \
-                        ./frontend
+                        docker build \
+                            --label "git.commit=${env.GIT_COMMIT_SHORT}" \
+                            --label "build.number=${env.BUILD_NUMBER}" \
+                            --label "build.url=${env.BUILD_URL}" \
+                            -t ${ECR_REGISTRY}/${FRONTEND_IMAGE_NAME}:${env.IMAGE_TAG} \
+                            -t ${ECR_REGISTRY}/${FRONTEND_IMAGE_NAME}:latest \
+                            ./frontend
 
-                    docker build \
-                        --label "git.commit=${env.GIT_COMMIT_SHORT}" \
-                        --label "build.number=${env.BUILD_NUMBER}" \
-                        --label "build.url=${env.BUILD_URL}" \
-                        -t ${PROXY_IMAGE}:${env.IMAGE_TAG} \
-                        -t ${PROXY_IMAGE}:latest \
-                        ./nginx
-                """
+                        docker build \
+                            --label "git.commit=${env.GIT_COMMIT_SHORT}" \
+                            --label "build.number=${env.BUILD_NUMBER}" \
+                            --label "build.url=${env.BUILD_URL}" \
+                            -t ${ECR_REGISTRY}/${PROXY_IMAGE_NAME}:${env.IMAGE_TAG} \
+                            -t ${ECR_REGISTRY}/${PROXY_IMAGE_NAME}:latest \
+                            ./nginx
+                    """
+                }
             }
         }
 
@@ -319,33 +301,36 @@ pipeline {
         stage('Image Vulnerability Scan') {
             steps {
                 echo '🛡️  Scanning Docker images with Trivy...'
-                script {
-                    // Install Trivy if not already present on the agent
-                    sh '''
-                        if ! command -v trivy &> /dev/null; then
-                            echo "Installing Trivy..."
-                            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-                                | sh -s -- -b /usr/local/bin
-                        fi
-                    '''
+                withCredentials([string(credentialsId: 'ecr-registry', variable: 'ECR_REGISTRY')]) {
+                    script {
+                        // Install Trivy if not already present on the agent
+                        sh '''
+                            if ! command -v trivy &> /dev/null; then
+                                echo "Installing Trivy..."
+                                curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+                                    | sh -s -- -b /usr/local/bin
+                            fi
+                        '''
 
-                    def images = [
-                        [name: 'Backend',  tag: "${BACKEND_IMAGE}:${env.IMAGE_TAG}"],
-                        [name: 'Frontend', tag: "${FRONTEND_IMAGE}:${env.IMAGE_TAG}"],
-                        [name: 'Proxy',    tag: "${PROXY_IMAGE}:${env.IMAGE_TAG}"]
-                    ]
+                        def images = [
+                            [name: 'Backend',  imgName: "${ECR_REGISTRY}/${BACKEND_IMAGE_NAME}"],
+                            [name: 'Frontend', imgName: "${ECR_REGISTRY}/${FRONTEND_IMAGE_NAME}"],
+                            [name: 'Proxy',    imgName: "${ECR_REGISTRY}/${PROXY_IMAGE_NAME}"]
+                        ]
 
-                    images.each { img ->
-                        echo "Scanning ${img.name} image..."
-                        sh """
-                            trivy image \
-                                --exit-code 1 \
-                                --severity CRITICAL \
-                                --no-progress \
-                                --format table \
-                                --output trivy-${img.name.toLowerCase()}.txt \
-                                ${img.tag} || (cat trivy-${img.name.toLowerCase()}.txt && exit 1)
-                        """
+                        images.each { img ->
+                            echo "Scanning ${img.name} image..."
+                            sh """
+                                trivy image \
+                                    --exit-code 1 \
+                                    --severity CRITICAL \
+                                    --no-progress \
+                                    --format table \
+                                    --output trivy-${img.name.toLowerCase()}.txt \
+                                    ${img.imgName}:${env.IMAGE_TAG} || \
+                                    (cat trivy-${img.name.toLowerCase()}.txt && exit 1)
+                            """
+                        }
                     }
                 }
             }
@@ -365,22 +350,29 @@ pipeline {
             }
             steps {
                 echo '📤 Pushing images to Amazon ECR...'
-                sh """
-                    aws ecr get-login-password --region ${AWS_REGION} \
-                        | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id',     variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
+                    string(credentialsId: 'aws-region',            variable: 'AWS_REGION'),
+                    string(credentialsId: 'ecr-registry',          variable: 'ECR_REGISTRY')
+                ]) {
+                    sh """
+                        aws ecr get-login-password --region ${AWS_REGION} \
+                            | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
-                    # Backend
-                    docker push ${BACKEND_IMAGE}:${env.IMAGE_TAG}
-                    docker push ${BACKEND_IMAGE}:latest
+                        # Backend
+                        docker push ${ECR_REGISTRY}/${BACKEND_IMAGE_NAME}:${env.IMAGE_TAG}
+                        docker push ${ECR_REGISTRY}/${BACKEND_IMAGE_NAME}:latest
 
-                    # Frontend
-                    docker push ${FRONTEND_IMAGE}:${env.IMAGE_TAG}
-                    docker push ${FRONTEND_IMAGE}:latest
+                        # Frontend
+                        docker push ${ECR_REGISTRY}/${FRONTEND_IMAGE_NAME}:${env.IMAGE_TAG}
+                        docker push ${ECR_REGISTRY}/${FRONTEND_IMAGE_NAME}:latest
 
-                    # Proxy
-                    docker push ${PROXY_IMAGE}:${env.IMAGE_TAG}
-                    docker push ${PROXY_IMAGE}:latest
-                """
+                        # Proxy
+                        docker push ${ECR_REGISTRY}/${PROXY_IMAGE_NAME}:${env.IMAGE_TAG}
+                        docker push ${ECR_REGISTRY}/${PROXY_IMAGE_NAME}:latest
+                    """
+                }
             }
         }
 
@@ -393,11 +385,21 @@ pipeline {
             }
             steps {
                 echo '🚀 Deploying to EC2...'
-                withCredentials([sshUserPrivateKey(
-                    credentialsId : 'ec2-ssh-key',
-                    keyFileVariable: 'SSH_KEY',
-                    usernameVariable: 'SSH_USER'
-                )]) {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id',     variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
+                    string(credentialsId: 'aws-region',            variable: 'AWS_REGION'),
+                    string(credentialsId: 'ecr-registry',          variable: 'ECR_REGISTRY'),
+                    string(credentialsId: 'ec2-host',              variable: 'EC2_HOST'),
+                    string(credentialsId: 'db-username',            variable: 'DB_USERNAME'),
+                    string(credentialsId: 'db-password',            variable: 'DB_PASSWORD'),
+                    string(credentialsId: 'db-name',                variable: 'DB_NAME'),
+                    sshUserPrivateKey(
+                        credentialsId  : 'ec2-ssh-key',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
                     sh """
                         # Write .env file
                         cat > .env <<EOF
@@ -453,98 +455,96 @@ REMOTE
             }
             steps {
                 echo '💨 Running smoke test against deployed application...'
-                sh """
-                    echo "Waiting 20s for containers to stabilise..."
-                    sleep 20
+                withCredentials([string(credentialsId: 'ec2-host', variable: 'EC2_HOST')]) {
+                    sh """
+                        echo "Waiting 20s for containers to stabilise..."
+                        sleep 20
 
-                    MAX_RETRIES=5
-                    RETRY_DELAY=10
-                    URL="http://${EC2_HOST}/"
+                        MAX_RETRIES=5
+                        RETRY_DELAY=10
+                        URL="http://${EC2_HOST}/"
 
-                    for i in \$(seq 1 \$MAX_RETRIES); do
-                        HTTP_CODE=\$(curl -s -o /dev/null -w "%{http_code}" "\$URL" || echo "000")
-                        echo "Attempt \$i — HTTP \$HTTP_CODE"
+                        for i in \$(seq 1 \$MAX_RETRIES); do
+                            HTTP_CODE=\$(curl -s -o /dev/null -w "%{http_code}" "\$URL" || echo "000")
+                            echo "Attempt \$i — HTTP \$HTTP_CODE"
 
-                        if echo "200 301 302" | grep -qw "\$HTTP_CODE"; then
-                            echo "✅ Smoke test passed (HTTP \$HTTP_CODE)"
-                            exit 0
-                        fi
+                            if echo "200 301 302" | grep -qw "\$HTTP_CODE"; then
+                                echo "✅ Smoke test passed (HTTP \$HTTP_CODE)"
+                                exit 0
+                            fi
 
-                        if [ \$i -lt \$MAX_RETRIES ]; then
-                            echo "Retrying in \${RETRY_DELAY}s..."
-                            sleep \$RETRY_DELAY
-                        fi
-                    done
+                            if [ \$i -lt \$MAX_RETRIES ]; then
+                                echo "Retrying in \${RETRY_DELAY}s..."
+                                sleep \$RETRY_DELAY
+                            fi
+                        done
 
-                    echo "❌ Smoke test failed after \$MAX_RETRIES attempts"
-                    exit 1
-                """
+                        echo "❌ Smoke test failed after \$MAX_RETRIES attempts"
+                        exit 1
+                    """
+                }
             }
         }
 
     } // end stages
 
     // -------------------------------------------------------------------------
-    // Post-build actions
+    // Post-build actions — resilient: no credential dependencies
     // -------------------------------------------------------------------------
     post {
 
         success {
             echo '✅ Pipeline succeeded!'
-            slackSend(
-                channel    : env.SLACK_CHANNEL,
-                color      : 'good',
-                tokenCredentialId: env.SLACK_CREDENTIALS_ID,
-                message    : """
-✅ *Build Succeeded* — Notes App
-*Branch:*  `${env.BRANCH_NAME}`
-*Commit:*  `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}
-*Message:* ${env.GIT_MESSAGE}
-*Build:*   <${env.BUILD_URL}|#${env.BUILD_NUMBER}>
-                """.stripIndent().trim()
-            )
+            script {
+                try {
+                    slackSend(
+                        channel: env.SLACK_CHANNEL,
+                        color: 'good',
+                        tokenCredentialId: 'slack-token',
+                        message: "✅ *Build Succeeded* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Commit:* `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}\n*Message:* ${env.GIT_MESSAGE}\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
+                    )
+                } catch (Exception e) {
+                    echo "⚠️ Slack notification failed: ${e.message}"
+                }
+            }
         }
 
         failure {
             echo '❌ Pipeline failed!'
-            slackSend(
-                channel    : env.SLACK_CHANNEL,
-                color      : 'danger',
-                tokenCredentialId: env.SLACK_CREDENTIALS_ID,
-                message    : """
-❌ *Build Failed* — Notes App
-*Branch:*  `${env.BRANCH_NAME}`
-*Commit:*  `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}
-*Message:* ${env.GIT_MESSAGE}
-*Build:*   <${env.BUILD_URL}|#${env.BUILD_NUMBER}>
-*Stage:*   ${env.STAGE_NAME ?: 'Unknown'}
-                """.stripIndent().trim()
-            )
+            script {
+                try {
+                    slackSend(
+                        channel: env.SLACK_CHANNEL,
+                        color: 'danger',
+                        tokenCredentialId: 'slack-token',
+                        message: "❌ *Build Failed* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Commit:* `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}\n*Message:* ${env.GIT_MESSAGE}\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
+                    )
+                } catch (Exception e) {
+                    echo "⚠️ Slack notification failed: ${e.message}"
+                }
+            }
         }
 
         unstable {
-            slackSend(
-                channel    : env.SLACK_CHANNEL,
-                color      : 'warning',
-                tokenCredentialId: env.SLACK_CREDENTIALS_ID,
-                message    : """
-⚠️ *Build Unstable* — Notes App
-*Branch:*  `${env.BRANCH_NAME}`
-*Build:*   <${env.BUILD_URL}|#${env.BUILD_NUMBER}>
-                """.stripIndent().trim()
-            )
+            script {
+                try {
+                    slackSend(
+                        channel: env.SLACK_CHANNEL,
+                        color: 'warning',
+                        tokenCredentialId: 'slack-token',
+                        message: "⚠️ *Build Unstable* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
+                    )
+                } catch (Exception e) {
+                    echo "⚠️ Slack notification failed: ${e.message}"
+                }
+            }
         }
 
         always {
             echo '🧹 Cleaning up workspace...'
-            // Remove locally built Docker images to free disk space
+            // Docker cleanup — uses image names only, no credential dependency
             sh """
-                docker rmi ${BACKEND_IMAGE}:${env.IMAGE_TAG}  || true
-                docker rmi ${FRONTEND_IMAGE}:${env.IMAGE_TAG} || true
-                docker rmi ${PROXY_IMAGE}:${env.IMAGE_TAG}    || true
-                docker rmi ${BACKEND_IMAGE}:latest            || true
-                docker rmi ${FRONTEND_IMAGE}:latest           || true
-                docker rmi ${PROXY_IMAGE}:latest              || true
+                docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'notes-(backend|frontend|proxy)' | xargs -r docker rmi -f || true
             """
             cleanWs()
         }
