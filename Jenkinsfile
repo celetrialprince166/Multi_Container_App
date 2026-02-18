@@ -36,7 +36,9 @@
 
 pipeline {
 
-    agent "agent"
+    agent {
+        label 'agent'
+    }
 
     // -------------------------------------------------------------------------
     // Global options
