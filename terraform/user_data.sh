@@ -95,13 +95,15 @@ systemctl enable docker
 usermod -aG docker ubuntu
 
 # Configure Docker daemon
+# IMPORTANT: Do NOT set global log-opts here.
+# Per-service logging blocks in docker-compose.ecr.yml use the awslogs driver.
+# If daemon-level log-opts (max-size, max-file) are set globally, Docker bleeds
+# them into per-service awslogs overrides — awslogs doesn't understand those opts
+# and throws "unknown log opt 'awslogs-stream-prefix'" at container start.
+# Each service manages its own logging options in the compose file.
 cat > /etc/docker/daemon.json <<EOF
 {
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "10m",
-    "max-file": "3"
-  }
+  "log-driver": "json-file"
 }
 EOF
 

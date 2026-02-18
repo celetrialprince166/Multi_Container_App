@@ -92,6 +92,7 @@ resource "aws_instance" "monitoring" {
     app_server_private_ip  = aws_instance.notes_app.private_ip
     grafana_admin_password = var.grafana_admin_password
     aws_region             = var.aws_region
+    git_repo_url           = var.git_repo_url
   })
 
   # IMDSv2 required — prevents SSRF attacks from reading instance metadata

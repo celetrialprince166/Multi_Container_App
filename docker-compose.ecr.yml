@@ -46,10 +46,9 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: /notes-app/containers # CloudWatch log group
-        awslogs-region: ${AWS_REGION:-eu-west-1} # Must match your AWS region
-        awslogs-stream-prefix: proxy # Stream = prefix/container-name/id
-        awslogs-create-group: "true" # Auto-create group if missing
+        awslogs-group: /notes-app/containers
+        awslogs-region: ${AWS_REGION:-eu-west-1}
+        awslogs-stream-prefix: proxy
 
   frontend:
     image: ${ECR_REGISTRY}/notes-frontend:latest
@@ -84,7 +83,6 @@ services:
         awslogs-group: /notes-app/containers
         awslogs-region: ${AWS_REGION:-eu-west-1}
         awslogs-stream-prefix: frontend
-        awslogs-create-group: "true"
 
   backend:
     image: ${ECR_REGISTRY}/notes-backend:latest
@@ -127,7 +125,6 @@ services:
         awslogs-group: /notes-app/containers
         awslogs-region: ${AWS_REGION:-eu-west-1}
         awslogs-stream-prefix: backend
-        awslogs-create-group: "true"
 
   database:
     # Use ECR Public to avoid Docker Hub auth/rate limits
@@ -161,7 +158,6 @@ services:
         awslogs-group: /notes-app/containers
         awslogs-region: ${AWS_REGION:-eu-west-1}
         awslogs-stream-prefix: database
-        awslogs-create-group: "true"
 
   # ── Node Exporter ───────────────────────────────────────────────────────────
   # Exposes OS-level metrics of the APP SERVER host machine on port 9100.

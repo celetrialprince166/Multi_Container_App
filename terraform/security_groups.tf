@@ -72,7 +72,7 @@ resource "aws_vpc_security_group_ingress_rule" "https" {
 # Restricted to operator CIDR. Prefer SSM Session Manager for day-to-day access.
 resource "aws_vpc_security_group_ingress_rule" "ssh" {
   security_group_id = aws_security_group.notes_app.id
-  description       = "SSH emergency access — restricted to operator IP"
+  description       = "SSH emergency access - restricted to operator IP"
 
   from_port   = local.ssh_port
   to_port     = local.ssh_port

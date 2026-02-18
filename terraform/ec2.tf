@@ -60,7 +60,11 @@ resource "aws_instance" "notes_app" {
   lifecycle {
     ignore_changes = [
       ami, # Don't recreate instance when AMI updates
-      user_data # Don't recreate if user_data changes
+      user_data,
+      # user_data intentionally NOT ignored here — removing it from ignore_changes
+      # forces Terraform to replace the instance when user_data.sh changes.
+      # After the replacement is confirmed working, add user_data back to
+      # ignore_changes to prevent accidental future replacements.
     ]
   }
 

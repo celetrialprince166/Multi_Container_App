@@ -44,7 +44,7 @@ resource "aws_security_group" "monitoring" {
 # Grafana UI — port 3000
 resource "aws_vpc_security_group_ingress_rule" "grafana" {
   security_group_id = aws_security_group.monitoring.id
-  description       = "Grafana dashboard — restricted to operator IP"
+  description       = "Grafana dashboard - restricted to operator IP"
 
   from_port   = 3000
   to_port     = 3000
@@ -58,7 +58,7 @@ resource "aws_vpc_security_group_ingress_rule" "grafana" {
 # No built-in auth — SG is the only guard. Never open to 0.0.0.0/0.
 resource "aws_vpc_security_group_ingress_rule" "prometheus_ui" {
   security_group_id = aws_security_group.monitoring.id
-  description       = "Prometheus UI — restricted to operator IP"
+  description       = "Prometheus UI - restricted to operator IP"
 
   from_port   = 9090
   to_port     = 9090
@@ -71,7 +71,7 @@ resource "aws_vpc_security_group_ingress_rule" "prometheus_ui" {
 # SSH — port 22
 resource "aws_vpc_security_group_ingress_rule" "monitoring_ssh" {
   security_group_id = aws_security_group.monitoring.id
-  description       = "SSH emergency access — restricted to operator IP"
+  description       = "SSH emergency access - restricted to operator IP"
 
   from_port   = 22
   to_port     = 22
@@ -86,7 +86,7 @@ resource "aws_vpc_security_group_ingress_rule" "monitoring_ssh" {
 # This SG-to-self rule handles future multi-instance setups cleanly.
 resource "aws_vpc_security_group_ingress_rule" "monitoring_node_exporter_self" {
   security_group_id            = aws_security_group.monitoring.id
-  description                  = "Node Exporter — self-scrape within monitoring SG"
+  description                  = "Node Exporter - self-scrape within monitoring SG"
   referenced_security_group_id = aws_security_group.monitoring.id
 
   from_port   = 9100
