@@ -370,7 +370,7 @@ pipeline {
                     string(credentialsId: 'ecr-registry',          variable: 'ECR_REGISTRY'),
                     string(credentialsId: 'ec2-host',              variable: 'EC2_HOST'),
                     string(credentialsId: 'db-username',            variable: 'DB_USERNAME'),
-                    string(credentialsId: 'db-password',            variable: 'DB_PASSWORD'),
+                    string(credentialsId: 'db_password',            variable: 'DB_PASSWORD'),
                     string(credentialsId: 'db-name',                variable: 'DB_NAME'),
                     sshUserPrivateKey(
                         credentialsId  : 'ec2-ssh-key',
