@@ -315,7 +315,11 @@ pipeline {
         // =====================================================================
         stage('Push to ECR') {
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.GIT_BRANCH == 'refs/heads/main' }
+                }
             }
             steps {
                 echo '📤 Pushing images to Amazon ECR...'
@@ -350,7 +354,11 @@ pipeline {
         // =====================================================================
         stage('Deploy to EC2') {
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.GIT_BRANCH == 'refs/heads/main' }
+                }
             }
             steps {
                 echo '🚀 Deploying to EC2...'
@@ -420,7 +428,11 @@ REMOTE
         // =====================================================================
         stage('Smoke Test') {
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.GIT_BRANCH == 'refs/heads/main' }
+                }
             }
             steps {
                 echo '💨 Running smoke test against deployed application...'
