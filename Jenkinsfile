@@ -385,6 +385,7 @@ pipeline {
                         # Write .env file
                         cat > .env <<EOF
 ECR_REGISTRY=${ECR_REGISTRY}
+AWS_REGION=${AWS_REGION}
 DB_USERNAME=${DB_USERNAME}
 DB_PASSWORD=${DB_PASSWORD}
 DB_NAME=${DB_NAME}
