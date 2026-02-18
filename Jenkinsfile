@@ -56,8 +56,9 @@ pipeline {
     // -------------------------------------------------------------------------
     environment {
         // SonarCloud config (update these)
-        SONAR_ORGANIZATION = 'your-sonarcloud-org'
-        SONAR_PROJECT_KEY  = 'notes-app'
+        SONAR_ORGANIZATION = 'Prince
+'
+        SONAR_PROJECT_KEY  = 'celetrialprince166'
 
         // Slack config (update these)
         SLACK_CHANNEL      = '#ci-cd-alerts'
