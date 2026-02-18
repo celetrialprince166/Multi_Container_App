@@ -44,11 +44,10 @@ services:
     # The EC2 IAM role must have logs:PutLogEvents + logs:CreateLogStream.
     # Stream name pattern: proxy/notes-proxy/<container-id>
     logging:
-      driver: awslogs
+      driver: json-file
       options:
-        awslogs-group: /notes-app/containers
-        awslogs-region: ${AWS_REGION:-eu-west-1}
-        awslogs-stream-prefix: proxy
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     image: ${ECR_REGISTRY}/notes-frontend:latest
@@ -78,11 +77,10 @@ services:
       start_period: 15s
     # Stream = frontend/notes-frontend/<container-id>
     logging:
-      driver: awslogs
+      driver: json-file
       options:
-        awslogs-group: /notes-app/containers
-        awslogs-region: ${AWS_REGION:-eu-west-1}
-        awslogs-stream-prefix: frontend
+        max-size: "10m"
+        max-file: "3"
 
   backend:
     image: ${ECR_REGISTRY}/notes-backend:latest
@@ -120,11 +118,10 @@ services:
     # Stream = backend/notes-backend/<container-id>
     # This stream will contain NestJS logs AND is where /metrics is served from.
     logging:
-      driver: awslogs
+      driver: json-file
       options:
-        awslogs-group: /notes-app/containers
-        awslogs-region: ${AWS_REGION:-eu-west-1}
-        awslogs-stream-prefix: backend
+        max-size: "10m"
+        max-file: "3"
 
   database:
     # Use ECR Public to avoid Docker Hub auth/rate limits
@@ -153,11 +150,10 @@ services:
     # Stream = database/notes-database/<container-id>
     # Captures PostgreSQL startup messages, slow query warnings, and errors.
     logging:
-      driver: awslogs
+      driver: json-file
       options:
-        awslogs-group: /notes-app/containers
-        awslogs-region: ${AWS_REGION:-eu-west-1}
-        awslogs-stream-prefix: database
+        max-size: "10m"
+        max-file: "3"
 
   # ── Node Exporter ───────────────────────────────────────────────────────────
   # Exposes OS-level metrics of the APP SERVER host machine on port 9100.
