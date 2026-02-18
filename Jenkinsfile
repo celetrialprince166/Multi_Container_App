@@ -103,7 +103,7 @@ pipeline {
                     steps {
                         dir('backend') {
                             echo '🔍 Running TypeScript compiler check (backend)...'
-                            sh 'npm ci'
+                            sh 'npm install'
                             // Type-check without emitting output
                             sh 'npx tsc --noEmit'
                         }
@@ -114,7 +114,7 @@ pipeline {
                     steps {
                         dir('frontend') {
                             echo '🔍 Running Next.js lint (frontend)...'
-                            sh 'npm ci'
+                            sh 'npm install'
                             // next lint exits 0 even with warnings by default
                             sh 'npm run lint || true'
                         }
