@@ -445,6 +445,45 @@ Added debug `echo` statements in the Checkout stage to print both `env.BRANCH_NA
 
 ---
 
+## Observability & Security
+
+This project implements a comprehensive observability stack and security posture, ensuring production readiness.
+
+### Architecture
+
+- **App Server (EC2)**: Runs the application stack (Nginx, Frontend, Backend, Database) and Node Exporter (host metrics).
+- **Monitoring Server (EC2)**: A dedicated instance running Prometheus, Grafana, and its own Node Exporter. It scrapes metrics from the App Server via private IP.
+
+### Monitoring Stack
+
+| Component | Port | Purpose |
+|---|---|---|
+| **Prometheus** | 9090 | Scrapes metrics from `/metrics` (backend) and `:9100` (Node Exporters). Stores time-series data. |
+| **Grafana** | 3000 | Visualizes metrics with a pre-configured dashboard. Users log in via web UI. |
+| **Node Exporter** | 9100 | Exposes OS-level metrics (CPU, RAM, Disk, Network) from both instances. |
+| **CloudWatch Logs** | - | Captures container logs (stdout/stderr) for long-term retention and search. |
+
+### Security Measures
+
+- **Network Isolation**: The App Server only accepts HTTP/SSH traffic. Metrics ports (3001, 9100) are restricted to the Monitoring Server's security group.
+- **IAM Least Privilege**:
+  - App Server: Can only write logs to CloudWatch.
+  - Monitoring Server: Can only read CloudWatch metrics (if configured).
+- **Threat Detection**: GuardDuty monitors for malicious activity (e.g., unauthorized access, malware).
+- **Audit Logging**: CloudTrail logs all API actions to an encrypted S3 bucket.
+
+### Accessing the Dashboard
+
+1. Get the Monitoring Server IP:
+   ```bash
+   terraform output monitoring_server_ip
+   ```
+2. Open `http://<MONITORING_IP>:3000` in your browser.
+3. Login with `admin` and the password set in `terraform.tfvars`.
+4. Navigate to **Dashboards -> Notes App Dashboard**.
+
+---
+
 ## Future Improvements
 
 - [ ] Add HTTPS with ACM and Route 53 for production domains

@@ -86,6 +86,8 @@ services:
     image: ${ECR_REGISTRY}/notes-backend:latest
     container_name: notes-backend
     restart: unless-stopped
+    ports:
+      - "3001:3001" # Expose metrics endpoint (internal SG blocks public access)
     environment:
       - NODE_ENV=production
       - PORT=3001
