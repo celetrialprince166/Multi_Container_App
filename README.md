@@ -466,30 +466,7 @@ This project implements a dedicated, production-grade observability pipeline on 
 
 ### Observability Architecture
 
-```
-┌─────────────────────────┐           ┌──────────────────────────────────┐
-│    App Server (EC2)     │           │     Monitoring Server (EC2)      │
-│                         │           │                                  │
-│  ┌───────┐ ┌─────────┐ │  scrape   │  ┌────────────┐                 │
-│  │Backend│ │  Node   │ │◄──────────│  │ Prometheus │                 │
-│  │:3001  │ │Exporter │ │  :3001    │  │ :9090      │                 │
-│  │/metric│ │ :9100   │ │  :9100    │  └─────┬──────┘                 │
-│  └───────┘ └─────────┘ │           │        │ fires alerts           │
-│                         │           │  ┌─────▼──────┐                 │
-│  4 App Containers       │           │  │Alertmanager│──► Slack #alerts│
-│  (Nginx, Frontend,      │           │  │ :9093      │                 │
-│   Backend, Postgres)    │           │  └────────────┘                 │
-│                         │           │  ┌────────────┐                 │
-│                         │           │  │  Grafana   │                 │
-│                         │           │  │  :3000     │                 │
-│                         │           │  └────────────┘                 │
-│                         │           │  ┌────────────┐                 │
-│                         │           │  │   Node     │                 │
-│                         │           │  │  Exporter  │ (self-monitor) │
-│                         │           │  │   :9100    │                 │
-│                         │           │  └────────────┘                 │
-└─────────────────────────┘           └──────────────────────────────────┘
-```
+![Observability Stack Architecture](images/obsevabilitystack.png)
 
 ### Monitoring Components
 
