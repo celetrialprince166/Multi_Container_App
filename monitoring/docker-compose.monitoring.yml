@@ -112,11 +112,11 @@ services:
       # Persistent Grafana DB (dashboards saved in UI, users, alert state)
       - grafana_data:/opt/bitnami/grafana/data
       # Auto-provision Prometheus datasource on first boot
-      - /opt/monitoring/grafana/provisioning/datasources:/opt/bitnami/grafana/conf/provisioning/datasources:ro
+      - /opt/monitoring/grafana/provisioning/datasources:/opt/bitnami/grafana/conf/provisioning/datasources
       # Auto-provision dashboard loader
-      - /opt/monitoring/grafana/provisioning/dashboards:/opt/bitnami/grafana/conf/provisioning/dashboards:ro
+      - /opt/monitoring/grafana/provisioning/dashboards:/opt/bitnami/grafana/conf/provisioning/dashboards
       # Dashboard JSON files
-      - /opt/monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
+      - /opt/monitoring/grafana/dashboards:/etc/grafana/dashboards
     depends_on:
       prometheus:
         condition: service_started
