@@ -167,3 +167,14 @@ variable "grafana_admin_password" {
   }
 }
 
+variable "slack_webhook_url" {
+  description = "Slack Incoming Webhook URL for Alertmanager notifications"
+  type        = string
+  sensitive   = true
+  default     = ""
+
+  validation {
+    condition     = var.slack_webhook_url == "" || can(regex("^https://hooks\\.slack\\.com/", var.slack_webhook_url))
+    error_message = "Slack webhook URL must start with https://hooks.slack.com/ or be empty."
+  }
+}

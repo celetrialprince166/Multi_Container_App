@@ -6,6 +6,7 @@
 #
 # Services:
 #   - prometheus    → time-series metrics database + alerting engine
+#   - alertmanager  → alert routing + Slack notifications
 #   - grafana       → visualisation dashboards
 #   - node-exporter → OS metrics for the monitoring server itself
 #
@@ -57,6 +58,39 @@ services:
       retries: 3
       start_period: 15s
 
+  # ── Alertmanager ───────────────────────────────────────────────────────────
+  # Receives firing alerts from Prometheus and routes them to Slack.
+  # UI available at http://<monitoring-ip>:9093
+  alertmanager:
+    image: public.ecr.aws/bitnami/alertmanager:0.27.0
+    container_name: alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - /opt/monitoring/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml:ro
+      - alertmanager_data:/opt/bitnami/alertmanager/data
+    command:
+      - "--config.file=/opt/bitnami/alertmanager/conf/config.yml"
+      - "--storage.path=/opt/bitnami/alertmanager/data"
+      - "--web.external-url=http://localhost:9093"
+    networks:
+      - monitoring
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9093/-/healthy",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
   # ── Grafana ─────────────────────────────────────────────────────────────────
   grafana:
     image: public.ecr.aws/bitnami/grafana:10.4.2
@@ -85,7 +119,7 @@ services:
       - /opt/monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
     depends_on:
       prometheus:
-        condition: service_healthy
+        condition: service_started
     networks:
       - monitoring
     healthcheck:
@@ -131,3 +165,5 @@ volumes:
     name: prometheus-data
   grafana_data:
     name: grafana-data
+  alertmanager_data:
+    name: alertmanager-data

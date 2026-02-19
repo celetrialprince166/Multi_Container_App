@@ -9,6 +9,7 @@
 # Terraform injects:
 #   ${app_server_private_ip}  — private IP of the app EC2
 #   ${grafana_admin_password} — Grafana admin password (from tfvars/sensitive)
+#   ${slack_webhook_url}      — Slack webhook for Alertmanager notifications
 #   ${git_repo_url}           — GitHub repo URL (configs live in monitoring/)
 # =============================================================================
 
@@ -63,6 +64,7 @@ MONITORING_DIR="/opt/monitoring"
 # Clone the repository — the monitoring/ directory contains all config files:
 #   monitoring/prometheus.yml
 #   monitoring/alert_rules.yml
+#   monitoring/alertmanager.yml
 #   monitoring/docker-compose.monitoring.yml
 #   monitoring/grafana/provisioning/datasources/prometheus.yml
 #   monitoring/grafana/provisioning/dashboards/dashboard.yml
@@ -79,6 +81,17 @@ rm -rf /tmp/repo
 # runtime substitution needed. Everything else is static config.
 sed -i "s/APP_SERVER_PRIVATE_IP/${app_server_private_ip}/g" \
     "$MONITORING_DIR/prometheus.yml"
+
+# ── Inject the Slack webhook URL into alertmanager.yml ───────────────────────
+# alertmanager.yml uses the placeholder SLACK_WEBHOOK_URL which must be
+# replaced with the actual webhook URL at boot time.
+if [ -n "${slack_webhook_url}" ]; then
+  sed -i "s|SLACK_WEBHOOK_URL|${slack_webhook_url}|g" \
+      "$MONITORING_DIR/alertmanager.yml"
+  echo "Slack webhook URL injected into alertmanager.yml"
+else
+  echo "WARNING: No Slack webhook URL provided — Alertmanager will not send notifications"
+fi
 
 # ── Write the Grafana admin password into an env file ────────────────────────
 # docker-compose.monitoring.yml reads GRAFANA_ADMIN_PASSWORD from the
@@ -116,8 +129,9 @@ echo "Monitoring Server Bootstrap Complete!"
 echo "Time: $(date)"
 echo ""
 echo "Services:"
-echo "  Prometheus: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):9090"
-echo "  Grafana:    http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):3000"
+echo "  Prometheus:    http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):9090"
+echo "  Grafana:       http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):3000"
+echo "  Alertmanager:  http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):9093"
 echo "  Login:      admin / (see grafana_admin_password in Terraform)"
 echo ""
 echo "Scraping app server at: ${app_server_private_ip}"

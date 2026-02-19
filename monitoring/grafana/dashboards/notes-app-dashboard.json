@@ -55,9 +55,6 @@
     "id": null,
     "links": [],
     "panels": [
-        // =========================================================================
-        // ROW 1: Application Overview (stat panels — quick health at a glance)
-        // =========================================================================
         {
             "collapsed": false,
             "gridPos": {
@@ -70,7 +67,6 @@
             "title": "Application Overview",
             "type": "row"
         },
-        // ── Requests per Second ───────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -137,7 +133,6 @@
             "title": "Requests / sec",
             "type": "stat"
         },
-        // ── HTTP Error Rate ───────────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -204,7 +199,6 @@
             "title": "HTTP Error Rate (5xx)",
             "type": "stat"
         },
-        // ── P95 Latency ───────────────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -271,7 +265,6 @@
             "title": "P95 Latency",
             "type": "stat"
         },
-        // ── Backend Up/Down ───────────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -345,9 +338,6 @@
             "title": "Backend Status",
             "type": "stat"
         },
-        // =========================================================================
-        // ROW 2: HTTP Traffic Details
-        // =========================================================================
         {
             "collapsed": false,
             "gridPos": {
@@ -360,7 +350,6 @@
             "title": "HTTP Traffic",
             "type": "row"
         },
-        // ── Requests per Second by Route ─────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -409,7 +398,6 @@
             "title": "Requests/sec by Route",
             "type": "timeseries"
         },
-        // ── HTTP Status Code Breakdown ────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -505,9 +493,6 @@
             "title": "Requests/sec by Status Code",
             "type": "timeseries"
         },
-        // =========================================================================
-        // ROW 3: Latency
-        // =========================================================================
         {
             "collapsed": false,
             "gridPos": {
@@ -520,7 +505,6 @@
             "title": "Latency",
             "type": "row"
         },
-        // ── Latency Percentiles ───────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -634,7 +618,6 @@
             "title": "Request Latency Percentiles (P50 / P95 / P99)",
             "type": "timeseries"
         },
-        // ── Latency by Route ──────────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -683,9 +666,6 @@
             "title": "P95 Latency by Route",
             "type": "timeseries"
         },
-        // =========================================================================
-        // ROW 4: Infrastructure — App Server
-        // =========================================================================
         {
             "collapsed": false,
             "gridPos": {
@@ -698,7 +678,6 @@
             "title": "Infrastructure — App Server",
             "type": "row"
         },
-        // ── CPU Usage ─────────────────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -765,7 +744,6 @@
             "title": "App Server CPU Usage",
             "type": "timeseries"
         },
-        // ── Memory Usage ──────────────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -822,7 +800,6 @@
             "title": "App Server Memory",
             "type": "timeseries"
         },
-        // ── Disk Usage ────────────────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -887,9 +864,6 @@
             "title": "App Server Disk Usage (/)",
             "type": "gauge"
         },
-        // =========================================================================
-        // ROW 5: Node.js Runtime Metrics
-        // =========================================================================
         {
             "collapsed": false,
             "gridPos": {
@@ -902,7 +876,6 @@
             "title": "Node.js Runtime",
             "type": "row"
         },
-        // ── Heap Used ─────────────────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",
@@ -959,7 +932,6 @@
             "title": "Node.js Heap Memory",
             "type": "timeseries"
         },
-        // ── Event Loop Lag ────────────────────────────────────────────────────────
         {
             "datasource": {
                 "type": "prometheus",

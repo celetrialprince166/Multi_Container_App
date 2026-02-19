@@ -91,6 +91,7 @@ resource "aws_instance" "monitoring" {
   user_data = templatefile("${path.module}/monitoring_user_data.sh", {
     app_server_private_ip  = aws_instance.notes_app.private_ip
     grafana_admin_password = var.grafana_admin_password
+    slack_webhook_url      = var.slack_webhook_url
     aws_region             = var.aws_region
     git_repo_url           = var.git_repo_url
   })

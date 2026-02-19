@@ -68,6 +68,20 @@ resource "aws_vpc_security_group_ingress_rule" "prometheus_ui" {
   tags = { Name = "monitoring-prometheus-inbound" }
 }
 
+# Alertmanager UI — port 9093
+# No built-in auth — SG is the only guard. Never open to 0.0.0.0/0.
+resource "aws_vpc_security_group_ingress_rule" "alertmanager_ui" {
+  security_group_id = aws_security_group.monitoring.id
+  description       = "Alertmanager UI - restricted to operator IP"
+
+  from_port   = 9093
+  to_port     = 9093
+  ip_protocol = "tcp"
+  cidr_ipv4   = join(",", var.allowed_ssh_cidr)
+
+  tags = { Name = "monitoring-alertmanager-inbound" }
+}
+
 # SSH — port 22
 resource "aws_vpc_security_group_ingress_rule" "monitoring_ssh" {
   security_group_id = aws_security_group.monitoring.id
