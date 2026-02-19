@@ -15,6 +15,7 @@ A production-ready full-stack Notes application deployed on AWS EC2 using Docker
 - [Usage](#usage)
 - [Jenkins CI/CD Pipeline](#jenkins-cicd-pipeline)
 - [Project Structure](#project-structure)
+- [Observability Stack](#observability-stack)
 - [Learning Outcomes](#learning-outcomes)
 - [Challenges & Solutions](#challenges--solutions)
 - [Future Improvements](#future-improvements)
@@ -54,12 +55,20 @@ This project was built to master end-to-end DevOps practices for containerized a
 - **Jenkins**: Self-hosted CI/CD server extending the pipeline with static analysis, security scanning, SonarCloud quality gates, Trivy image scanning, and Slack notifications.
 - **Amazon ECR**: Container registry for application images. Integrated with IAM and avoids Docker Hub rate limits.
 - **AWS EC2**: Compute host running Ubuntu 22.04 with Docker. Bootstraped via user data for Docker and SSM agent.
+- **Prometheus**: Time-series database and alerting engine. Scrapes application and infrastructure metrics every 15 seconds.
+- **Alertmanager**: Alert routing and notification service. Groups, deduplicates, and routes firing alerts to Slack.
+- **Grafana**: Metrics visualisation with pre-provisioned dashboards and auto-configured Prometheus datasource.
+- **Node Exporter**: Prometheus exporter for OS-level metrics (CPU, RAM, disk, network) running on both servers.
 
 ---
 
 ## Architecture Diagram
 
 ![Multi-Container Notes Application - AWS Architecture](images/arch.png)
+
+### Jenkins CI/CD Architecture
+
+![Multi-Container Notes Application - Jenkins CI/CD Architecture](images/jenkinsarch.png)
 
 ---
 
@@ -343,6 +352,12 @@ Multi_Container_App/
 ├── Jenkinsfile                 # Jenkins declarative pipeline (10 stages)
 ├── docker-compose.yml          # Local development
 ├── docker-compose.ecr.yml      # Production (ECR images)
+├── monitoring/
+│   ├── docker-compose.monitoring.yml  # Prometheus + Alertmanager + Grafana + Node Exporter
+│   ├── prometheus.yml                 # Scrape targets and alerting config
+│   ├── alert_rules.yml                # 6 alert rules
+│   ├── alertmanager.yml               # Slack notification routing
+│   └── grafana/                       # Dashboards and provisioning configs
 └── .env.example
 ```
 
@@ -445,42 +460,156 @@ Added debug `echo` statements in the Checkout stage to print both `env.BRANCH_NA
 
 ---
 
-## Observability & Security
+## Observability Stack
 
-This project implements a comprehensive observability stack and security posture, ensuring production readiness.
+This project implements a dedicated, production-grade observability pipeline on a separate EC2 instance. The monitoring server scrapes metrics from the application server over the private VPC network, visualises them in Grafana, and fires alerts to Slack when something goes wrong.
 
-### Architecture
+### Observability Architecture
 
-- **App Server (EC2)**: Runs the application stack (Nginx, Frontend, Backend, Database) and Node Exporter (host metrics).
-- **Monitoring Server (EC2)**: A dedicated instance running Prometheus, Grafana, and its own Node Exporter. It scrapes metrics from the App Server via private IP.
+```
+┌─────────────────────────┐           ┌──────────────────────────────────┐
+│    App Server (EC2)     │           │     Monitoring Server (EC2)      │
+│                         │           │                                  │
+│  ┌───────┐ ┌─────────┐ │  scrape   │  ┌────────────┐                 │
+│  │Backend│ │  Node   │ │◄──────────│  │ Prometheus │                 │
+│  │:3001  │ │Exporter │ │  :3001    │  │ :9090      │                 │
+│  │/metric│ │ :9100   │ │  :9100    │  └─────┬──────┘                 │
+│  └───────┘ └─────────┘ │           │        │ fires alerts           │
+│                         │           │  ┌─────▼──────┐                 │
+│  4 App Containers       │           │  │Alertmanager│──► Slack #alerts│
+│  (Nginx, Frontend,      │           │  │ :9093      │                 │
+│   Backend, Postgres)    │           │  └────────────┘                 │
+│                         │           │  ┌────────────┐                 │
+│                         │           │  │  Grafana   │                 │
+│                         │           │  │  :3000     │                 │
+│                         │           │  └────────────┘                 │
+│                         │           │  ┌────────────┐                 │
+│                         │           │  │   Node     │                 │
+│                         │           │  │  Exporter  │ (self-monitor) │
+│                         │           │  │   :9100    │                 │
+│                         │           │  └────────────┘                 │
+└─────────────────────────┘           └──────────────────────────────────┘
+```
 
-### Monitoring Stack
+### Monitoring Components
 
-| Component | Port | Purpose |
+| Component | Port | Image | Purpose |
+|---|---|---|---|
+| **Prometheus** | 9090 | `bitnami/prometheus:2.51.2` | Scrapes metrics every 15s, evaluates alert rules, stores 15 days of time-series data |
+| **Alertmanager** | 9093 | `bitnami/alertmanager:0.27.0` | Groups, deduplicates, and routes firing alerts to Slack |
+| **Grafana** | 3000 | `bitnami/grafana:10.4.2` | Pre-configured dashboard with auto-provisioned Prometheus datasource |
+| **Node Exporter** | 9100 | `bitnami/node-exporter:1.8.2` | Exposes OS metrics (CPU, RAM, disk, network) — runs on **both** servers |
+
+> All images are pulled from **ECR Public Gallery** (`public.ecr.aws/bitnami/...`) to avoid Docker Hub rate limits.
+
+**Prometheus Scrape Targets** — all 4 targets reporting as active:
+
+![Prometheus Targets Dashboard](images/promdash.png)
+
+### Metrics Collected
+
+**Application Metrics** (NestJS `/metrics` endpoint on `:3001`):
+- HTTP request rate, duration histograms, and error counts
+- Node.js runtime stats (event loop lag, heap usage, GC pauses)
+- Active connections and request sizes
+
+**Infrastructure Metrics** (Node Exporter on both servers):
+- CPU utilisation and load averages
+- Memory usage and availability
+- Disk space and I/O throughput
+- Network traffic (bytes in/out)
+
+### Alert Rules
+
+Six pre-configured alert rules in [`alert_rules.yml`](monitoring/alert_rules.yml):
+
+| Alert | Severity | Condition | Duration |
+|---|---|---|---|
+| `BackendDown` | 🔴 critical | Backend `/metrics` unreachable | 1 min |
+| `HighErrorRate` | 🟡 warning | 5xx responses > 5% of total | 5 min |
+| `HighP95Latency` | 🟡 warning | P95 response time > 500ms | 5 min |
+| `HighCPU` | 🟡 warning | CPU utilisation > 80% | 5 min |
+| `LowMemory` | 🔴 critical | Available RAM < 10% | 5 min |
+| `DiskSpaceLow` | 🔴 critical | Disk usage > 85% | 5 min |
+
+### Notification Pipeline
+
+Alertmanager routes firing alerts to **Slack**:
+
+- **Critical alerts** → `#alerts` channel, repeated every **1 hour**
+- **Warning alerts** → `#alerts` channel, repeated every **4 hours**
+- **Resolved** notifications are sent automatically when alerts clear
+- **Inhibition**: Critical alerts suppress warnings for the same target
+- **Grouping**: Related alerts are batched into a single message (30s window)
+
+**Live Alert Example** — `BackendDown` firing and resolving in Slack:
+
+![Slack Alert — BackendDown firing and resolved](images/slackalertscreenshot.png)
+
+### Grafana Dashboard
+
+A pre-provisioned **Notes App Dashboard** is auto-loaded on first boot with panels for:
+
+- Request rate and error rate by method, route, and status code
+- Response time percentiles (P50, P95, P99)
+- CPU, memory, and disk usage for both servers
+- Node.js runtime metrics (heap, event loop, GC)
+
+![Grafana Dashboard](images/grafanadash.png)
+
+### Network Security
+
+Metrics ports are **never** exposed to the public internet:
+
+| Rule | App Server SG | Monitoring Server SG |
 |---|---|---|
-| **Prometheus** | 9090 | Scrapes metrics from `/metrics` (backend) and `:9100` (Node Exporters). Stores time-series data. |
-| **Grafana** | 3000 | Visualizes metrics with a pre-configured dashboard. Users log in via web UI. |
-| **Node Exporter** | 9100 | Exposes OS-level metrics (CPU, RAM, Disk, Network) from both instances. |
-| **CloudWatch Logs** | - | Captures container logs (stdout/stderr) for long-term retention and search. |
+| HTTP (80) | ✅ Public | — |
+| Prometheus (9090) | — | ✅ Operator IP only |
+| Grafana (3000) | — | ✅ Operator IP only |
+| Alertmanager (9093) | — | ✅ Operator IP only |
+| Node Exporter (9100) | Monitoring SG only | Self (monitoring SG) |
+| Backend metrics (3001) | Monitoring SG only | — |
+| SSH (22) | Operator IP only | Operator IP only |
 
-### Security Measures
+### Accessing the Stack
 
-- **Network Isolation**: The App Server only accepts HTTP/SSH traffic. Metrics ports (3001, 9100) are restricted to the Monitoring Server's security group.
-- **IAM Least Privilege**:
-  - App Server: Can only write logs to CloudWatch.
-  - Monitoring Server: Can only read CloudWatch metrics (if configured).
-- **Threat Detection**: GuardDuty monitors for malicious activity (e.g., unauthorized access, malware).
-- **Audit Logging**: CloudTrail logs all API actions to an encrypted S3 bucket.
-
-### Accessing the Dashboard
-
-1. Get the Monitoring Server IP:
+1. **Get the Monitoring Server IP:**
    ```bash
    terraform output monitoring_server_ip
    ```
-2. Open `http://<MONITORING_IP>:3000` in your browser.
-3. Login with `admin` and the password set in `terraform.tfvars`.
-4. Navigate to **Dashboards -> Notes App Dashboard**.
+
+2. **Access the UIs:**
+
+   | Service | URL |
+   |---|---|
+   | Prometheus | `http://<MONITORING_IP>:9090` |
+   | Grafana | `http://<MONITORING_IP>:3000` |
+   | Alertmanager | `http://<MONITORING_IP>:9093` |
+
+3. **Grafana Login:** `admin` / password from `grafana_admin_password` in `terraform.tfvars`
+
+4. **Reload Prometheus config** (no container restart needed):
+   ```bash
+   curl -X POST http://<MONITORING_IP>:9090/-/reload
+   ```
+
+### Observability File Structure
+
+```
+monitoring/
+├── docker-compose.monitoring.yml   # 4 services: prometheus, alertmanager, grafana, node-exporter
+├── prometheus.yml                  # Scrape configs + alerting block
+├── alert_rules.yml                 # 6 alert rules (backend, CPU, memory, disk, latency, errors)
+├── alertmanager.yml                # Slack routing, grouping, inhibition rules
+└── grafana/
+    ├── provisioning/
+    │   ├── datasources/
+    │   │   └── prometheus.yml      # Auto-provision Prometheus as default datasource
+    │   └── dashboards/
+    │       └── dashboard.yml       # Dashboard loader config
+    └── dashboards/
+        └── notes-app-dashboard.json  # Pre-built dashboard (~1000 lines)
+```
 
 ---
 
@@ -489,7 +618,9 @@ This project implements a comprehensive observability stack and security posture
 - [ ] Add HTTPS with ACM and Route 53 for production domains
 - [ ] Introduce RDS for PostgreSQL to separate database lifecycle from EC2
 - [ ] Implement blue-green or canary deployments to reduce downtime
-- [ ] Add Prometheus and Grafana for monitoring and alerting
+- [x] ~~Add Prometheus and Grafana for monitoring and alerting~~
+- [x] ~~Add Alertmanager with Slack notifications~~
+- [ ] Add email notifications as a fallback receiver in Alertmanager
 - [ ] Restrict SSH (port 22) to specific IP ranges or use SSM Session Manager only
 - [ ] Add Terraform remote state in S3 with DynamoDB locking
 - [ ] Implement automated database backups and retention policies

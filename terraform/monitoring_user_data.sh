@@ -102,6 +102,13 @@ GRAFANA_ADMIN_PASSWORD=${grafana_admin_password}
 ENVEOF
 chmod 600 "$MONITORING_DIR/.env"  # Only root can read the password
 
+# ── Fix Grafana provisioning directory permissions ───────────────────────────
+# Bitnami Grafana runs as UID 1001 and copies sample.yaml files into the
+# provisioning directories at startup. The directories created by git clone
+# are owned by root, so we chown them to UID 1001 to prevent "Permission denied".
+chown -R 1001:1001 "$MONITORING_DIR/grafana"
+echo "Grafana directory ownership set to UID 1001"
+
 # =============================================================================
 # [4/4] Start the Monitoring Stack
 # =============================================================================
