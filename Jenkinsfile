@@ -184,7 +184,7 @@ pipeline {
         }
 
         // =====================================================================
-        // Stage 3 — Dependency Security Audit
+        // Stage 4 — Dependency Security Audit (blocking on HIGH/CRITICAL)
         // =====================================================================
         stage('Dependency Security Audit') {
             parallel {
@@ -194,9 +194,18 @@ pipeline {
                         dir('backend') {
                             echo '🔒 Running npm audit (backend)...'
                             sh '''
-                                npm audit --audit-level=high \
-                                    --json > npm-audit-backend.json || true
+                                set +e
+                                npm audit --audit-level=high --json > npm-audit-backend.json
+                                AUDIT_EXIT=$?
+                                set -e
+
+                                echo "──── npm audit (backend) — human-readable ────"
                                 npm audit --audit-level=high || true
+
+                                if [ "$AUDIT_EXIT" -ne 0 ]; then
+                                  echo "npm audit (backend) found HIGH/CRITICAL vulnerabilities — failing stage."
+                                  exit 1
+                                fi
                             '''
                         }
                     }
@@ -204,6 +213,14 @@ pipeline {
                         always {
                             archiveArtifacts artifacts: 'backend/npm-audit-backend.json',
                                              allowEmptyArchive: true
+                            publishHTML target: [
+                                reportDir           : 'backend',
+                                reportFiles         : 'npm-audit-backend.json',
+                                reportName          : 'Backend npm Audit',
+                                allowMissing        : true,
+                                alwaysLinkToLastBuild: true,
+                                keepAll             : true
+                            ]
                         }
                     }
                 }
@@ -213,9 +230,18 @@ pipeline {
                         dir('frontend') {
                             echo '🔒 Running npm audit (frontend)...'
                             sh '''
-                                npm audit --audit-level=high \
-                                    --json > npm-audit-frontend.json || true
+                                set +e
+                                npm audit --audit-level=high --json > npm-audit-frontend.json
+                                AUDIT_EXIT=$?
+                                set -e
+
+                                echo "──── npm audit (frontend) — human-readable ────"
                                 npm audit --audit-level=high || true
+
+                                if [ "$AUDIT_EXIT" -ne 0 ]; then
+                                  echo "npm audit (frontend) found HIGH/CRITICAL vulnerabilities — failing stage."
+                                  exit 1
+                                fi
                             '''
                         }
                     }
@@ -223,6 +249,14 @@ pipeline {
                         always {
                             archiveArtifacts artifacts: 'frontend/npm-audit-frontend.json',
                                              allowEmptyArchive: true
+                            publishHTML target: [
+                                reportDir           : 'frontend',
+                                reportFiles         : 'npm-audit-frontend.json',
+                                reportName          : 'Frontend npm Audit',
+                                allowMissing        : true,
+                                alwaysLinkToLastBuild: true,
+                                keepAll             : true
+                            ]
                         }
                     }
                 }
@@ -241,31 +275,26 @@ pipeline {
         }
 
         // =====================================================================
-        // Stage 5 — SonarCloud Analysis + Quality Gate
+        // Stage 5 — SonarCloud Analysis + Quality Gate (blocking when configured)
         // =====================================================================
         stage('SonarCloud Analysis') {
             steps {
                 echo '📊 Running SonarCloud analysis...'
                 script {
-                    try {
-                        withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
-                            withSonarQubeEnv('SonarCloud') {
-                                sh """
-                                    npx sonar-scanner \
-                                        -Dsonar.organization=${SONAR_ORGANIZATION} \
-                                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                                        -Dsonar.projectName='Notes App' \
-                                        -Dsonar.sources=backend/src,frontend/app \
-                                        -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/.next/**,**/coverage/** \
-                                        -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info \
-                                        -Dsonar.host.url=https://sonarcloud.io \
-                                        -Dsonar.token=${SONAR_TOKEN}
-                                """
-                            }
+                    withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
+                        withSonarQubeEnv('SonarCloud') {
+                            sh """
+                                npx sonar-scanner \
+                                    -Dsonar.organization=${SONAR_ORGANIZATION} \
+                                    -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                                    -Dsonar.projectName='Notes App' \
+                                    -Dsonar.sources=backend/src,frontend/app \
+                                    -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/.next/**,**/coverage/** \
+                                    -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info \
+                                    -Dsonar.host.url=https://sonarcloud.io \
+                                    -Dsonar.token=${SONAR_TOKEN}
+                            """
                         }
-                    } catch (Exception e) {
-                        echo "⚠️ SonarCloud analysis skipped: ${e.message}"
-                        echo 'To enable: add sonarcloud-token credential in Jenkins'
                     }
                 }
             }
@@ -275,12 +304,8 @@ pipeline {
             steps {
                 echo '🚦 Waiting for SonarCloud Quality Gate result...'
                 script {
-                    try {
-                        timeout(time: 5, unit: 'MINUTES') {
-                            waitForQualityGate abortPipeline: true
-                        }
-                    } catch (Exception e) {
-                        echo "⚠️ Quality Gate check skipped: ${e.message}"
+                    timeout(time: 5, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
                     }
                 }
             }
@@ -323,7 +348,7 @@ pipeline {
         }
 
         // =====================================================================
-        // Stage 7 — Image Vulnerability Scan (Trivy)
+        // Stage 7 — Image Vulnerability Scan (Trivy — blocking on HIGH/CRITICAL)
         // =====================================================================
         stage('Image Vulnerability Scan') {
             steps {
@@ -349,14 +374,23 @@ pipeline {
                         images.each { img ->
                             echo "Scanning ${img.name} image..."
                             sh """
+                                # JSON report (non-blocking, for archives)
                                 \$HOME/bin/trivy image \
                                     --exit-code 0 \
-                                    --severity CRITICAL \
+                                    --severity HIGH,CRITICAL \
+                                    --no-progress \
+                                    --format json \
+                                    --output trivy-${img.name.toLowerCase()}.json \
+                                    ${img.imgName}:${env.IMAGE_TAG}
+
+                                # Table report + blocking gate
+                                \$HOME/bin/trivy image \
+                                    --exit-code 1 \
+                                    --severity HIGH,CRITICAL \
                                     --no-progress \
                                     --format table \
                                     --output trivy-${img.name.toLowerCase()}.txt \
-                                    ${img.imgName}:${env.IMAGE_TAG} || \
-                                    (cat trivy-${img.name.toLowerCase()}.txt && exit 1)
+                                    ${img.imgName}:${env.IMAGE_TAG}
                             """
                         }
                     }
@@ -365,7 +399,86 @@ pipeline {
             post {
                 always {
                     archiveArtifacts artifacts: 'trivy-*.txt', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'trivy-*.json', allowEmptyArchive: true
+                    publishHTML target: [
+                        reportDir            : '.',
+                        reportFiles          : 'trivy-*.txt',
+                        reportName           : 'Trivy Image Scan',
+                        allowMissing         : true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll              : true
+                    ]
                 }
+            }
+        }
+
+        // =====================================================================
+        // Stage 8 — SBOM Generation (Syft)
+        // =====================================================================
+        stage('SBOM Generation — Syft') {
+            steps {
+                echo '📦 Generating SBOMs with Syft...'
+                withCredentials([string(credentialsId: 'ecr-registry', variable: 'ECR_REGISTRY')]) {
+                    script {
+                        sh '''
+                            set -e
+
+                            mkdir -p "$HOME/bin"
+                            if ! "$HOME/bin/syft" version >/dev/null 2>&1; then
+                              echo "Installing Syft to $HOME/bin..."
+                              curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b "$HOME/bin"
+                            fi
+
+                            IMAGES=("backend" "frontend" "proxy")
+
+                            for svc in "${IMAGES[@]}"; do
+                              case "$svc" in
+                                backend)
+                                  IMG="${ECR_REGISTRY}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
+                                  ;;
+                                frontend)
+                                  IMG="${ECR_REGISTRY}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
+                                  ;;
+                                proxy)
+                                  IMG="${ECR_REGISTRY}/${PROXY_IMAGE_NAME}:${IMAGE_TAG}"
+                                  ;;
+                              esac
+
+                              echo "Generating SBOMs for $svc ($IMG)..."
+                              "$HOME/bin/syft" "$IMG" -o cyclonedx-json=sbom-${svc}-cyclonedx.json
+                              "$HOME/bin/syft" "$IMG" -o spdx-json=sbom-${svc}-spdx.json
+                            done
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'sbom-*-cyclonedx.json', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'sbom-*-spdx.json', allowEmptyArchive: true
+                    publishHTML target: [
+                        reportDir            : '.',
+                        reportFiles          : 'sbom-*-cyclonedx.json',
+                        reportName           : 'SBOM (CycloneDX)',
+                        allowMissing         : true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll              : true
+                    ]
+                }
+            }
+        }
+
+        // =====================================================================
+        // Stage 9 — Security Gate Summary
+        // =====================================================================
+        stage('Security Gate Summary') {
+            steps {
+                echo '✅ All security gates passed for this build:'
+                echo '   - Gitleaks secret scan'
+                echo '   - npm audit (backend & frontend)'
+                echo '   - SonarCloud analysis + quality gate'
+                echo '   - Trivy image vulnerability scan'
+                echo '   - Syft SBOM generation'
             }
         }
 
