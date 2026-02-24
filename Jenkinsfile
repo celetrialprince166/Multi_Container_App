@@ -104,25 +104,36 @@ pipeline {
                     sh '''
                         set -e
 
+                        GITLEAKS_VERSION="8.21.2"
+
                         mkdir -p "$HOME/bin"
                         if ! "$HOME/bin/gitleaks" version >/dev/null 2>&1; then
-                          echo "Installing Gitleaks to $HOME/bin..."
-                          TMP_TAR=\"/tmp/gitleaks.tar.gz\"
-                          curl -sSL -o \"$TMP_TAR\" \
-                            https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz
-                          tar -xzf \"$TMP_TAR\" -C \"$HOME/bin\" gitleaks
-                          rm -f \"$TMP_TAR\"
+                          echo "Installing Gitleaks ${GITLEAKS_VERSION} to $HOME/bin..."
+                          curl -sSL -o /tmp/gitleaks.tar.gz \
+                            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+                          tar -xzf /tmp/gitleaks.tar.gz -C "$HOME/bin" gitleaks
+                          rm -f /tmp/gitleaks.tar.gz
+                          chmod +x "$HOME/bin/gitleaks"
                         fi
+
+                        "$HOME/bin/gitleaks" version
 
                         "$HOME/bin/gitleaks" detect \
                           --source . \
                           --report-format json \
-                          --report-path gitleaks-report.json
+                          --report-path gitleaks-report.json \
+                          --exit-code 1 || GITLEAKS_EXIT=$?
 
                         "$HOME/bin/gitleaks" detect \
                           --source . \
                           --report-format csv \
-                          --report-path gitleaks-report.csv
+                          --report-path gitleaks-report.csv \
+                          --exit-code 0
+
+                        if [ "${GITLEAKS_EXIT:-0}" -ne 0 ]; then
+                          echo "Gitleaks found secrets — failing the pipeline."
+                          exit 1
+                        fi
                     '''
                 }
             }
