@@ -92,7 +92,7 @@
       "environment": [
         { "name": "NODE_ENV", "value": "production" },
         { "name": "PORT", "value": "3001" },
-        { "name": "DB_HOST", "value": "database" },
+        { "name": "DB_HOST", "value": "localhost" },
         { "name": "DB_PORT", "value": "5432" },
         { "name": "DB_USERNAME", "value": "__DB_USERNAME__" },
         { "name": "DB_PASSWORD", "value": "__DB_PASSWORD__" },
