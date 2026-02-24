@@ -447,9 +447,9 @@ pipeline {
         stage('Push to ECR') {
             when {
                 anyOf {
-                    branch 'main'
-                    expression { env.GIT_BRANCH == 'origin/main' }
-                    expression { env.GIT_BRANCH == 'refs/heads/main' }
+                    branch 'gitops'
+                    expression { env.GIT_BRANCH == 'origin/gitops' }
+                    expression { env.GIT_BRANCH == 'refs/heads/gitops' }
                 }
             }
             steps {
@@ -547,9 +547,9 @@ pipeline {
         stage('Deploy to ECS Service') {
             when {
                 anyOf {
-                    branch 'main'
-                    expression { env.GIT_BRANCH == 'origin/main' }
-                    expression { env.GIT_BRANCH == 'refs/heads/main' }
+                    branch 'gitops'
+                    expression { env.GIT_BRANCH == 'origin/gitops' }
+                    expression { env.GIT_BRANCH == 'refs/heads/gitops' }
                 }
             }
             steps {
@@ -589,9 +589,9 @@ pipeline {
         stage('ECS Smoke Test') {
             when {
                 anyOf {
-                    branch 'main'
-                    expression { env.GIT_BRANCH == 'origin/main' }
-                    expression { env.GIT_BRANCH == 'refs/heads/main' }
+                    branch 'gitops'
+                    expression { env.GIT_BRANCH == 'origin/gitops' }
+                    expression { env.GIT_BRANCH == 'refs/heads/gitops' }
                 }
             }
             steps {
