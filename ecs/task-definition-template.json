@@ -2,8 +2,8 @@
   "family": "notes-app",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "1024",
-  "memory": "2048",
+  "cpu": "2048",
+  "memory": "4096",
   "executionRoleArn": "__EXECUTION_ROLE_ARN__",
   "taskRoleArn": "__TASK_ROLE_ARN__",
   "containerDefinitions": [
@@ -11,6 +11,7 @@
       "name": "proxy",
       "image": "__PROXY_IMAGE__",
       "essential": true,
+      "memory": 256,
       "dependsOn": [
         { "containerName": "backend", "condition": "HEALTHY" },
         { "containerName": "frontend", "condition": "HEALTHY" }
@@ -51,6 +52,7 @@
       "name": "frontend",
       "image": "__FRONTEND_IMAGE__",
       "essential": true,
+      "memory": 1024,
       "portMappings": [
         {
           "containerPort": 3000,
@@ -71,8 +73,8 @@
         "command": ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1"],
         "interval": 30,
         "timeout": 10,
-        "retries": 3,
-        "startPeriod": 15
+        "retries": 5,
+        "startPeriod": 60
       },
       "logConfiguration": {
         "logDriver": "awslogs",
@@ -87,6 +89,7 @@
       "name": "backend",
       "image": "__BACKEND_IMAGE__",
       "essential": true,
+      "memory": 1024,
       "dependsOn": [
         { "containerName": "database", "condition": "HEALTHY" }
       ],
@@ -126,6 +129,7 @@
       "name": "database",
       "image": "public.ecr.aws/docker/library/postgres:15-alpine",
       "essential": true,
+      "memory": 512,
       "portMappings": [
         {
           "containerPort": 5432,
