@@ -505,32 +505,32 @@ pipeline {
                     string(credentialsId: 'ecs-task-role-arn',           variable: 'ECS_TASK_ROLE_ARN'),
                     string(credentialsId: 'ecs-alb-dns-name',            variable: 'ECS_ALB_DNS_NAME')
                 ]) {
-                    sh """
+                    sh '''
                         set -e
 
                         chmod +x ecs/render-task-def.sh
 
-                        ./ecs/render-task-def.sh \\
-                          --region ${AWS_REGION} \\
-                          --ecr-registry ${ECR_REGISTRY} \\
-                          --image-tag ${IMAGE_TAG} \\
-                          --execution-role-arn ${ECS_EXEC_ROLE_ARN} \\
-                          --task-role-arn ${ECS_TASK_ROLE_ARN} \\
-                          --db-username ${DB_USERNAME} \\
-                          --db-password ${DB_PASSWORD} \\
-                          --db-name ${DB_NAME} \\
-                          --alb-dns-name ${ECS_ALB_DNS_NAME}
+                        ./ecs/render-task-def.sh \
+                          --region "$AWS_REGION" \
+                          --ecr-registry "$ECR_REGISTRY" \
+                          --image-tag "$IMAGE_TAG" \
+                          --execution-role-arn "$ECS_EXEC_ROLE_ARN" \
+                          --task-role-arn "$ECS_TASK_ROLE_ARN" \
+                          --db-username "$DB_USERNAME" \
+                          --db-password "$DB_PASSWORD" \
+                          --db-name "$DB_NAME" \
+                          --alb-dns-name "$ECS_ALB_DNS_NAME"
 
                         echo "Registering task definition with ECS..."
-                        TASK_DEF_ARN=\$(aws ecs register-task-definition \\
-                          --cli-input-json file://ecs/task-definition-rendered.json \\
-                          --region ${AWS_REGION} \\
-                          --query 'taskDefinition.taskDefinitionArn' \\
+                        TASK_DEF_ARN=$(aws ecs register-task-definition \
+                          --cli-input-json file://ecs/task-definition-rendered.json \
+                          --region "$AWS_REGION" \
+                          --query 'taskDefinition.taskDefinitionArn' \
                           --output text)
 
-                        echo "TASK_DEF_ARN=\${TASK_DEF_ARN}" > ecs/task-def-arn.env
-                        echo "Registered task definition: \${TASK_DEF_ARN}"
-                    """
+                        echo "TASK_DEF_ARN=$TASK_DEF_ARN" > ecs/task-def-arn.env
+                        echo "Registered task definition: $TASK_DEF_ARN"
+                    '''
                 }
             }
             post {
@@ -561,24 +561,24 @@ pipeline {
                     string(credentialsId: 'ecs-cluster-name',      variable: 'ECS_CLUSTER'),
                     string(credentialsId: 'ecs-service-name',      variable: 'ECS_SERVICE')
                 ]) {
-                    sh """
+                    sh '''
                         set -e
 
-                        source ecs/task-def-arn.env
+                        . ecs/task-def-arn.env
 
-                        aws ecs update-service \\
-                          --cluster ${ECS_CLUSTER} \\
-                          --service ${ECS_SERVICE} \\
-                          --task-definition "\${TASK_DEF_ARN}" \\
-                          --force-new-deployment \\
-                          --region ${AWS_REGION}
+                        aws ecs update-service \
+                          --cluster "$ECS_CLUSTER" \
+                          --service "$ECS_SERVICE" \
+                          --task-definition "$TASK_DEF_ARN" \
+                          --force-new-deployment \
+                          --region "$AWS_REGION"
 
                         echo "Waiting for ECS service to reach steady state..."
-                        aws ecs wait services-stable \\
-                          --cluster ${ECS_CLUSTER} \\
-                          --services ${ECS_SERVICE} \\
-                          --region ${AWS_REGION}
-                    """
+                        aws ecs wait services-stable \
+                          --cluster "$ECS_CLUSTER" \
+                          --services "$ECS_SERVICE" \
+                          --region "$AWS_REGION"
+                    '''
                 }
             }
         }
@@ -597,32 +597,32 @@ pipeline {
             steps {
                 echo '💨 Running smoke test against ECS ALB...'
                 withCredentials([string(credentialsId: 'ecs-alb-dns-name', variable: 'ECS_ALB_DNS_NAME')]) {
-                    sh """
+                    sh '''
                         echo "Waiting 30s for ECS tasks to stabilise behind ALB..."
                         sleep 30
 
                         MAX_RETRIES=5
                         RETRY_DELAY=10
-                        URL="http://${ECS_ALB_DNS_NAME}/"
+                        URL="http://$ECS_ALB_DNS_NAME/"
 
-                        for i in \$(seq 1 \$MAX_RETRIES); do
-                            HTTP_CODE=\$(curl -s -o /dev/null -w "%{http_code}" "\$URL" || echo "000")
-                            echo "Attempt \$i — HTTP \$HTTP_CODE"
+                        for i in $(seq 1 $MAX_RETRIES); do
+                            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+                            echo "Attempt $i — HTTP $HTTP_CODE"
 
-                            if echo "200 301 302" | grep -qw "\$HTTP_CODE"; then
-                                echo "✅ ECS smoke test passed (HTTP \$HTTP_CODE)"
+                            if echo "200 301 302" | grep -qw "$HTTP_CODE"; then
+                                echo "✅ ECS smoke test passed (HTTP $HTTP_CODE)"
                                 exit 0
                             fi
 
-                            if [ \$i -lt \$MAX_RETRIES ]; then
-                                echo "Retrying in \${RETRY_DELAY}s..."
-                                sleep \$RETRY_DELAY
+                            if [ $i -lt $MAX_RETRIES ]; then
+                                echo "Retrying in ${RETRY_DELAY}s..."
+                                sleep $RETRY_DELAY
                             fi
                         done
 
-                        echo "❌ ECS smoke test failed after \$MAX_RETRIES attempts"
+                        echo "❌ ECS smoke test failed after $MAX_RETRIES attempts"
                         exit 1
-                    """
+                    '''
                 }
             }
         }
