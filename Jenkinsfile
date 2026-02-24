@@ -107,8 +107,11 @@ pipeline {
                         mkdir -p "$HOME/bin"
                         if ! "$HOME/bin/gitleaks" version >/dev/null 2>&1; then
                           echo "Installing Gitleaks to $HOME/bin..."
-                          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz \
-                            | tar -xz -C "$HOME/bin" gitleaks
+                          TMP_TAR=\"/tmp/gitleaks.tar.gz\"
+                          curl -sSL -o \"$TMP_TAR\" \
+                            https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz
+                          tar -xzf \"$TMP_TAR\" -C \"$HOME/bin\" gitleaks
+                          rm -f \"$TMP_TAR\"
                         fi
 
                         "$HOME/bin/gitleaks" detect \
