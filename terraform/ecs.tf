@@ -73,7 +73,7 @@ resource "aws_ecs_service" "notes_app" {
 
   deployment_minimum_healthy_percent = 100
   deployment_maximum_percent         = 200
-  health_check_grace_period_seconds  = 60
+  health_check_grace_period_seconds  = 120
 
   network_configuration {
     subnets          = data.aws_subnets.default_vpc.ids

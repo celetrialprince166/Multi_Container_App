@@ -49,7 +49,7 @@
      unhealthy_threshold = 3
      timeout             = 5
      interval            = 30
-     path                = "/nginx-health"
+    path                = "/nginx-health"
      matcher             = "200"
    }
 
