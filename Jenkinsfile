@@ -126,7 +126,14 @@ pipeline {
             post {
                 always {
                     archiveArtifacts artifacts: 'gitleaks-report.*', allowEmptyArchive: false
-                    publishHTML([reportDir: '.', reportFiles: 'gitleaks-report.csv', reportName: 'Gitleaks Report'])
+                    publishHTML target: [
+                        reportDir           : '.',
+                        reportFiles         : 'gitleaks-report.csv',
+                        reportName          : 'Gitleaks Report',
+                        allowMissing        : false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll             : true
+                    ]
                 }
             }
         }
