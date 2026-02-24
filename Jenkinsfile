@@ -22,7 +22,7 @@
 //   ecr-registry           → Secret Text  — <account>.dkr.ecr.<region>.amazonaws.com
 //   ec2-host               → Secret Text  — EC2 public IP or hostname
 //   ec2-ssh-key            → SSH Username with private key — ubuntu
-//   db-username            → Secret Text
+//   db-username            → Secret Text $ 
 //   db-password            → Secret Text
 //   db-name                → Secret Text
 //   sonarcloud-token       → Secret Text  — SonarCloud user token
@@ -95,7 +95,44 @@ pipeline {
         }
 
         // =====================================================================
-        // Stage 2 — Static Code Analysis (parallel)
+        // Stage 2 — Secret Scan (Gitleaks)
+        // =====================================================================
+        stage('Secret Scan — Gitleaks') {
+            steps {
+                echo '🔐 Running Gitleaks secret scan...'
+                script {
+                    sh '''
+                        set -e
+
+                        mkdir -p "$HOME/bin"
+                        if ! "$HOME/bin/gitleaks" version >/dev/null 2>&1; then
+                          echo "Installing Gitleaks to $HOME/bin..."
+                          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz \
+                            | tar -xz -C "$HOME/bin" gitleaks
+                        fi
+
+                        "$HOME/bin/gitleaks" detect \
+                          --source . \
+                          --report-format json \
+                          --report-path gitleaks-report.json
+
+                        "$HOME/bin/gitleaks" detect \
+                          --source . \
+                          --report-format csv \
+                          --report-path gitleaks-report.csv
+                    '''
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'gitleaks-report.*', allowEmptyArchive: false
+                    publishHTML([reportDir: '.', reportFiles: 'gitleaks-report.csv', reportName: 'Gitleaks Report'])
+                }
+            }
+        }
+
+        // =====================================================================
+        // Stage 3 — Static Code Analysis (parallel)
         // =====================================================================
         stage('Static Code Analysis') {
             parallel {
