@@ -1,0 +1,144 @@
+{
+  "family": "notes-app",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "__EXECUTION_ROLE_ARN__",
+  "taskRoleArn": "__TASK_ROLE_ARN__",
+  "containerDefinitions": [
+    {
+      "name": "proxy",
+      "image": "__PROXY_IMAGE__",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "PROXY_PORT",
+          "value": "80"
+        },
+        {
+          "name": "NEXT_PUBLIC_API_URL",
+          "value": "__NEXT_PUBLIC_API_URL__"
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost/nginx-health || exit 1"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 10
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/notes-app/ecs/proxy",
+          "awslogs-region": "__AWS_REGION__",
+          "awslogs-stream-prefix": "proxy"
+        }
+      }
+    },
+    {
+      "name": "frontend",
+      "image": "__FRONTEND_IMAGE__",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        },
+        {
+          "name": "NEXT_PUBLIC_API_URL",
+          "value": "__NEXT_PUBLIC_API_URL__"
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 15
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/notes-app/ecs/frontend",
+          "awslogs-region": "__AWS_REGION__",
+          "awslogs-stream-prefix": "frontend"
+        }
+      }
+    },
+    {
+      "name": "backend",
+      "image": "__BACKEND_IMAGE__",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3001,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "NODE_ENV", "value": "production" },
+        { "name": "PORT", "value": "3001" },
+        { "name": "DB_HOST", "value": "database" },
+        { "name": "DB_PORT", "value": "5432" },
+        { "name": "DB_USERNAME", "value": "__DB_USERNAME__" },
+        { "name": "DB_PASSWORD", "value": "__DB_PASSWORD__" },
+        { "name": "DB_NAME", "value": "__DB_NAME__" },
+        { "name": "DB_SSL", "value": "false" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:3001/health || exit 1"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 10
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/notes-app/ecs/backend",
+          "awslogs-region": "__AWS_REGION__",
+          "awslogs-stream-prefix": "backend"
+        }
+      }
+    },
+    {
+      "name": "database",
+      "image": "public.ecr.aws/docker/library/postgres:15-alpine",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 5432,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "POSTGRES_USER", "value": "__DB_USERNAME__" },
+        { "name": "POSTGRES_PASSWORD", "value": "__DB_PASSWORD__" },
+        { "name": "POSTGRES_DB", "value": "__DB_NAME__" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/notes-app/ecs/backend",
+          "awslogs-region": "__AWS_REGION__",
+          "awslogs-stream-prefix": "database"
+        }
+      }
+    }
+  ]
+}
+

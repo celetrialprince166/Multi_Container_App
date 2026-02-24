@@ -14,12 +14,13 @@
 #
 # Current trust relationships:
 #
-#   monitoring SG ──port 3001──► app SG   (Prometheus scrapes /metrics)
-#   monitoring SG ──port 9100──► app SG   (Prometheus scrapes Node Exporter)
+#   monitoring SG ──port 3001──► app SG    (Prometheus scrapes /metrics)
+#   monitoring SG ──port 9100──► app SG    (Prometheus scrapes Node Exporter)
+#   ecs_alb SG   ──port 80───► ecs_tasks SG (ALB routes HTTP to ECS tasks)
 #
 # Future rules to add here (not yet implemented):
 #   - RDS SG ← app SG port 5432 (if PostgreSQL moves to RDS)
-#   - ALB SG → app SG port 3001 (if an ALB is added in front)
+#   - ALB SG → app SG port 3001 (if an ALB is added in front of EC2 host)
 # =============================================================================
 
 # =============================================================================
@@ -62,3 +63,24 @@ resource "aws_vpc_security_group_ingress_rule" "monitoring_to_app_node_exporter"
     Purpose   = "node-exporter-scrape"
   }
 }
+
+# =============================================================================
+# ECS ALB → ECS Tasks (HTTP)
+# =============================================================================
+
+resource "aws_vpc_security_group_ingress_rule" "ecs_alb_to_ecs_tasks_http" {
+  security_group_id            = aws_security_group.ecs_tasks.id
+  description                  = "ALB forwards HTTP (80) to ECS tasks"
+  referenced_security_group_id = aws_security_group.ecs_alb.id
+
+  from_port   = 80
+  to_port     = 80
+  ip_protocol = "tcp"
+
+  tags = {
+    Name      = "ecs-alb-to-ecs-tasks-http"
+    Direction = "alb→ecs-tasks"
+    Purpose   = "http-traffic"
+  }
+}
+

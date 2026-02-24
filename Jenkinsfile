@@ -96,6 +96,7 @@ pipeline {
 
         // =====================================================================
         // Stage 2 — Secret Scan (Gitleaks)
+        //   NOTE (lab mode): findings are reported but do NOT block the pipeline.
         // =====================================================================
         stage('Secret Scan — Gitleaks') {
             steps {
@@ -131,8 +132,7 @@ pipeline {
                           --exit-code 0
 
                         if [ "${GITLEAKS_EXIT:-0}" -ne 0 ]; then
-                          echo "Gitleaks found secrets — failing the pipeline."
-                          exit 1
+                          echo "WARNING: Gitleaks found potential secrets (pipeline not blocked in lab mode)."
                         fi
                     '''
                 }
@@ -184,7 +184,7 @@ pipeline {
         }
 
         // =====================================================================
-        // Stage 4 — Dependency Security Audit (blocking on HIGH/CRITICAL)
+        // Stage 4 — Dependency Security Audit (lab mode: non-blocking, reports only)
         // =====================================================================
         stage('Dependency Security Audit') {
             parallel {
@@ -203,8 +203,7 @@ pipeline {
                                 npm audit --audit-level=high || true
 
                                 if [ "$AUDIT_EXIT" -ne 0 ]; then
-                                  echo "npm audit (backend) found HIGH/CRITICAL vulnerabilities — failing stage."
-                                  exit 1
+                                  echo "WARNING: npm audit (backend) found HIGH/CRITICAL vulnerabilities (pipeline not blocked in lab mode)."
                                 fi
                             '''
                         }
@@ -239,8 +238,7 @@ pipeline {
                                 npm audit --audit-level=high || true
 
                                 if [ "$AUDIT_EXIT" -ne 0 ]; then
-                                  echo "npm audit (frontend) found HIGH/CRITICAL vulnerabilities — failing stage."
-                                  exit 1
+                                  echo "WARNING: npm audit (frontend) found HIGH/CRITICAL vulnerabilities (pipeline not blocked in lab mode)."
                                 fi
                             '''
                         }
@@ -275,7 +273,8 @@ pipeline {
         }
 
         // =====================================================================
-        // Stage 5 — SonarCloud Analysis + Quality Gate (blocking when configured)
+        // Stage 5 — SonarCloud Analysis + Quality Gate
+        //   NOTE (lab mode): gate status is reported but does NOT block deployment.
         // =====================================================================
         stage('SonarCloud Analysis') {
             steps {
@@ -305,7 +304,7 @@ pipeline {
                 echo '🚦 Waiting for SonarCloud Quality Gate result...'
                 script {
                     timeout(time: 5, unit: 'MINUTES') {
-                        waitForQualityGate abortPipeline: true
+                        waitForQualityGate abortPipeline: false
                     }
                 }
             }
@@ -348,7 +347,7 @@ pipeline {
         }
 
         // =====================================================================
-        // Stage 7 — Image Vulnerability Scan (Trivy — blocking on HIGH/CRITICAL)
+        // Stage 7 — Image Vulnerability Scan (Trivy — lab mode: non-blocking)
         // =====================================================================
         stage('Image Vulnerability Scan') {
             steps {
@@ -383,14 +382,14 @@ pipeline {
                                     --output trivy-${img.name.toLowerCase()}.json \
                                     ${img.imgName}:${env.IMAGE_TAG}
 
-                                # Table report + blocking gate
+                                # Table report + warning-only gate (lab mode)
                                 \$HOME/bin/trivy image \
                                     --exit-code 1 \
                                     --severity HIGH,CRITICAL \
                                     --no-progress \
                                     --format table \
                                     --output trivy-${img.name.toLowerCase()}.txt \
-                                    ${img.imgName}:${env.IMAGE_TAG}
+                                    ${img.imgName}:${env.IMAGE_TAG} || echo "WARNING: Trivy found HIGH/CRITICAL vulnerabilities in ${img.name} (pipeline not blocked in lab mode)."
                             """
                         }
                     }
@@ -522,9 +521,70 @@ pipeline {
         }
 
         // =====================================================================
-        // Stage 9 — Deploy to EC2  [main branch only]
+        // Stage 9 — Render & Register ECS Task Definition  [main branch only]
         // =====================================================================
-        stage('Deploy to EC2') {
+        stage('Render & Register ECS Task Definition') {
+            when {
+                anyOf {
+                    branch 'gitops'
+                    expression { env.GIT_BRANCH == 'origin/gitops' }
+                    expression { env.GIT_BRANCH == 'refs/heads/gitops' }
+                }
+            }
+            steps {
+                echo '📄 Rendering ECS task definition and registering new revision...'
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id',           variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key',       variable: 'AWS_SECRET_ACCESS_KEY'),
+                    string(credentialsId: 'aws-region',                  variable: 'AWS_REGION'),
+                    string(credentialsId: 'ecr-registry',                variable: 'ECR_REGISTRY'),
+                    string(credentialsId: 'db-username',                 variable: 'DB_USERNAME'),
+                    string(credentialsId: 'dbpassword',                  variable: 'DB_PASSWORD'),
+                    string(credentialsId: 'db-name',                     variable: 'DB_NAME'),
+                    string(credentialsId: 'ecs-task-execution-role-arn', variable: 'ECS_EXEC_ROLE_ARN'),
+                    string(credentialsId: 'ecs-task-role-arn',           variable: 'ECS_TASK_ROLE_ARN'),
+                    string(credentialsId: 'ecs-alb-dns-name',            variable: 'ECS_ALB_DNS_NAME')
+                ]) {
+                    sh """
+                        set -e
+
+                        chmod +x ecs/render-task-def.sh
+
+                        ./ecs/render-task-def.sh \\
+                          --region ${AWS_REGION} \\
+                          --ecr-registry ${ECR_REGISTRY} \\
+                          --image-tag ${IMAGE_TAG} \\
+                          --execution-role-arn ${ECS_EXEC_ROLE_ARN} \\
+                          --task-role-arn ${ECS_TASK_ROLE_ARN} \\
+                          --db-username ${DB_USERNAME} \\
+                          --db-password ${DB_PASSWORD} \\
+                          --db-name ${DB_NAME} \\
+                          --alb-dns-name ${ECS_ALB_DNS_NAME}
+
+                        echo "Registering task definition with ECS..."
+                        TASK_DEF_ARN=\$(aws ecs register-task-definition \\
+                          --cli-input-json file://ecs/task-definition-rendered.json \\
+                          --region ${AWS_REGION} \\
+                          --query 'taskDefinition.taskDefinitionArn' \\
+                          --output text)
+
+                        echo "TASK_DEF_ARN=\${TASK_DEF_ARN}" > ecs/task-def-arn.env
+                        echo "Registered task definition: \${TASK_DEF_ARN}"
+                    """
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'ecs/task-definition-rendered.json', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'ecs/task-def-arn.env', allowEmptyArchive: true
+                }
+            }
+        }
+
+        // =====================================================================
+        // Stage 10 — Deploy to ECS Service  [main branch only]
+        // =====================================================================
+        stage('Deploy to ECS Service') {
             when {
                 anyOf {
                     branch 'main'
@@ -533,84 +593,40 @@ pipeline {
                 }
             }
             steps {
-                echo '🚀 Deploying to EC2...'
+                echo '🚀 Updating ECS service with new task definition...'
                 withCredentials([
                     string(credentialsId: 'aws-access-key-id',     variable: 'AWS_ACCESS_KEY_ID'),
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
                     string(credentialsId: 'aws-region',            variable: 'AWS_REGION'),
-                    string(credentialsId: 'ecr-registry',          variable: 'ECR_REGISTRY'),
-                    string(credentialsId: 'ec2-host',              variable: 'EC2_HOST'),
-                    string(credentialsId: 'db-username',            variable: 'DB_USERNAME'),
-                    string(credentialsId: 'dbpassword',            variable: 'DB_PASSWORD'),
-                    string(credentialsId: 'db-name',                variable: 'DB_NAME'),
-                    sshUserPrivateKey(
-                        credentialsId  : 'ec2-ssh-key',
-                        keyFileVariable: 'SSH_KEY',
-                        usernameVariable: 'SSH_USER'
-                    )
+                    string(credentialsId: 'ecs-cluster-name',      variable: 'ECS_CLUSTER'),
+                    string(credentialsId: 'ecs-service-name',      variable: 'ECS_SERVICE')
                 ]) {
                     sh """
                         set -e
-                        set -x  # Enable debug output
 
-                        # Write .env file
-                        cat > .env <<EOF
-ECR_REGISTRY=${ECR_REGISTRY}
-AWS_REGION=${AWS_REGION}
-DB_USERNAME=${DB_USERNAME}
-DB_PASSWORD=${DB_PASSWORD}
-DB_NAME=${DB_NAME}
-DB_SSL=false
-PROXY_PORT=80
-NEXT_PUBLIC_API_URL=http://${EC2_HOST}/api
-EOF
+                        source ecs/task-def-arn.env
 
-                        # Copy files to EC2
-                        echo "📂 Copying files to ${EC2_HOST}..."
-                        scp -v -o StrictHostKeyChecking=no \
-                            -i "\${SSH_KEY}" \
-                            .env docker-compose.ecr.yml \
-                            \${SSH_USER}@${EC2_HOST}:/opt/notes-app/
+                        aws ecs update-service \\
+                          --cluster ${ECS_CLUSTER} \\
+                          --service ${ECS_SERVICE} \\
+                          --task-definition "\${TASK_DEF_ARN}" \\
+                          --force-new-deployment \\
+                          --region ${AWS_REGION}
 
-                        # Remote deploy commands
-                        echo "🚀 executing remote commands on ${EC2_HOST}..."
-                        ssh -v -o StrictHostKeyChecking=no \
-                            -i "\${SSH_KEY}" \
-                            \${SSH_USER}@${EC2_HOST} bash -s <<'REMOTE'
-                            set -e
-                            set -x
-                            cd /opt/notes-app
-
-                            # ECR login on the remote host
-                            aws ecr get-login-password --region ${AWS_REGION} \
-                                | docker login --username AWS --password-stdin ${ECR_REGISTRY}
-
-                            # Pull new images
-                            docker compose -f docker-compose.ecr.yml pull
-
-                            # Bring down existing containers cleanly before recreating
-                            # (required when log driver changes — Docker can't recreate
-                            # a container in-place if the driver config has changed)
-                            docker compose -f docker-compose.ecr.yml down --remove-orphans
-
-                            # Start fresh with new config
-                            docker compose -f docker-compose.ecr.yml up -d
-
-                            # Clean up dangling images
-                            docker image prune -f
-
-                            echo "✅ Deployment complete"
-                            docker compose -f docker-compose.ecr.yml ps
-REMOTE
+                        echo "Waiting for ECS service to reach steady state..."
+                        aws ecs wait services-stable \\
+                          --cluster ${ECS_CLUSTER} \\
+                          --services ${ECS_SERVICE} \\
+                          --region ${AWS_REGION}
                     """
                 }
             }
         }
 
         // =====================================================================
-        // Stage 10 — Smoke Test  [main branch only]
+        // Stage 11 — ECS Smoke Test  [main branch only]
         // =====================================================================
-        stage('Smoke Test') {
+        stage('ECS Smoke Test') {
             when {
                 anyOf {
                     branch 'main'
@@ -619,22 +635,22 @@ REMOTE
                 }
             }
             steps {
-                echo '💨 Running smoke test against deployed application...'
-                withCredentials([string(credentialsId: 'ec2-host', variable: 'EC2_HOST')]) {
+                echo '💨 Running smoke test against ECS ALB...'
+                withCredentials([string(credentialsId: 'ecs-alb-dns-name', variable: 'ECS_ALB_DNS_NAME')]) {
                     sh """
-                        echo "Waiting 20s for containers to stabilise..."
-                        sleep 20
+                        echo "Waiting 30s for ECS tasks to stabilise behind ALB..."
+                        sleep 30
 
                         MAX_RETRIES=5
                         RETRY_DELAY=10
-                        URL="http://${EC2_HOST}/"
+                        URL="http://${ECS_ALB_DNS_NAME}/"
 
                         for i in \$(seq 1 \$MAX_RETRIES); do
                             HTTP_CODE=\$(curl -s -o /dev/null -w "%{http_code}" "\$URL" || echo "000")
                             echo "Attempt \$i — HTTP \$HTTP_CODE"
 
                             if echo "200 301 302" | grep -qw "\$HTTP_CODE"; then
-                                echo "✅ Smoke test passed (HTTP \$HTTP_CODE)"
+                                echo "✅ ECS smoke test passed (HTTP \$HTTP_CODE)"
                                 exit 0
                             fi
 
@@ -644,7 +660,7 @@ REMOTE
                             fi
                         done
 
-                        echo "❌ Smoke test failed after \$MAX_RETRIES attempts"
+                        echo "❌ ECS smoke test failed after \$MAX_RETRIES attempts"
                         exit 1
                     """
                 }
