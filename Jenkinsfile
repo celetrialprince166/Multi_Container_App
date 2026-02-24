@@ -140,14 +140,6 @@ pipeline {
             post {
                 always {
                     archiveArtifacts artifacts: 'gitleaks-report.*', allowEmptyArchive: false
-                    publishHTML target: [
-                        reportDir           : '.',
-                        reportFiles         : 'gitleaks-report.csv',
-                        reportName          : 'Gitleaks Report',
-                        allowMissing        : false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll             : true
-                    ]
                 }
             }
         }
@@ -212,14 +204,6 @@ pipeline {
                         always {
                             archiveArtifacts artifacts: 'backend/npm-audit-backend.json',
                                              allowEmptyArchive: true
-                            publishHTML target: [
-                                reportDir           : 'backend',
-                                reportFiles         : 'npm-audit-backend.json',
-                                reportName          : 'Backend npm Audit',
-                                allowMissing        : true,
-                                alwaysLinkToLastBuild: true,
-                                keepAll             : true
-                            ]
                         }
                     }
                 }
@@ -247,14 +231,6 @@ pipeline {
                         always {
                             archiveArtifacts artifacts: 'frontend/npm-audit-frontend.json',
                                              allowEmptyArchive: true
-                            publishHTML target: [
-                                reportDir           : 'frontend',
-                                reportFiles         : 'npm-audit-frontend.json',
-                                reportName          : 'Frontend npm Audit',
-                                allowMissing        : true,
-                                alwaysLinkToLastBuild: true,
-                                keepAll             : true
-                            ]
                         }
                     }
                 }
@@ -399,14 +375,6 @@ pipeline {
                 always {
                     archiveArtifacts artifacts: 'trivy-*.txt', allowEmptyArchive: true
                     archiveArtifacts artifacts: 'trivy-*.json', allowEmptyArchive: true
-                    publishHTML target: [
-                        reportDir            : '.',
-                        reportFiles          : 'trivy-*.txt',
-                        reportName           : 'Trivy Image Scan',
-                        allowMissing         : true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll              : true
-                    ]
                 }
             }
         }
@@ -428,9 +396,9 @@ pipeline {
                               curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b "$HOME/bin"
                             fi
 
-                            IMAGES=("backend" "frontend" "proxy")
+                            IMAGES="backend frontend proxy"
 
-                            for svc in "${IMAGES[@]}"; do
+                            for svc in $IMAGES; do
                               case "$svc" in
                                 backend)
                                   IMG="${ECR_REGISTRY}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
@@ -455,14 +423,6 @@ pipeline {
                 always {
                     archiveArtifacts artifacts: 'sbom-*-cyclonedx.json', allowEmptyArchive: true
                     archiveArtifacts artifacts: 'sbom-*-spdx.json', allowEmptyArchive: true
-                    publishHTML target: [
-                        reportDir            : '.',
-                        reportFiles          : 'sbom-*-cyclonedx.json',
-                        reportName           : 'SBOM (CycloneDX)',
-                        allowMissing         : true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll              : true
-                    ]
                 }
             }
         }
