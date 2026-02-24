@@ -13,8 +13,7 @@
       "essential": true,
       "memory": 256,
       "dependsOn": [
-        { "containerName": "backend", "condition": "HEALTHY" },
-        { "containerName": "frontend", "condition": "HEALTHY" }
+        { "containerName": "backend", "condition": "HEALTHY" }
       ],
       "portMappings": [
         {
