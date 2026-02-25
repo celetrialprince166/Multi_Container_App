@@ -1,0 +1,23 @@
+apiVersion: 1
+
+# =============================================================================
+# Grafana Datasource Provisioning — CloudWatch
+# =============================================================================
+# Provides access to AWS CloudWatch metrics (including ECS/Container Insights)
+# so we can graph ECS cluster and service CPU/memory alongside Prometheus data.
+# The monitoring EC2 instance has the CloudWatchReadOnlyAccess IAM policy
+# attached, so Grafana can authenticate using instance metadata credentials.
+# =============================================================================
+
+datasources:
+  - name: CloudWatch
+    type: cloudwatch
+    access: proxy
+    uid: cloudwatch
+    isDefault: false
+    editable: false
+    jsonData:
+      authType: default
+      defaultRegion: eu-west-1
+      customMetricsNamespaces: []
+

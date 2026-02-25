@@ -43,37 +43,28 @@ rule_files:
 # Scrape Targets
 # =============================================================================
 scrape_configs:
-  # ── NestJS Backend /metrics ─────────────────────────────────────────────────
+  # ── NestJS Backend /metrics on ECS (Cloud Map DNS) ───────────────────────────
   # Scrapes the custom application metrics exposed by @willsoto/nestjs-prometheus:
   #   http_requests_total{method, route, status_code}
   #   http_request_duration_seconds{method, route, status_code}
   # Plus default Node.js runtime metrics (heap, GC, event loop, CPU).
   #
-  # Port 3001 is the NestJS container port — NOT proxied by Nginx.
-  # Only reachable from the monitoring server via the sg_rules.tf SG rule.
-  - job_name: notes-backend
-    static_configs:
-      - targets:
-          - "APP_SERVER_PRIVATE_IP:3001"
-        labels:
-          instance: app-server
-          service: nestjs-backend
+  # ECS Fargate tasks register into AWS Cloud Map using the private DNS
+  # namespace defined in terraform/service_discovery.tf. We use DNS SD so that
+  # Prometheus automatically discovers task IPs as they scale in/out.
+  #
+  # FQDN pattern:
+  #   <environment>-notes-backend.notes.local
+  # e.g. dev-notes-backend.notes.local
+  - job_name: notes-backend-ecs
+    dns_sd_configs:
+      - names:
+          - "dev-notes-backend.notes.local"
+        type: A
+        port: 3001
     metrics_path: /metrics
     scrape_interval: 15s
     scrape_timeout: 10s
-
-  # ── Node Exporter — App Server ───────────────────────────────────────────────
-  # OS-level metrics of the EC2 running the Notes app:
-  #   node_cpu_seconds_total, node_memory_MemAvailable_bytes,
-  #   node_disk_io_time_seconds_total, node_network_receive_bytes_total, etc.
-  - job_name: node-exporter-app
-    static_configs:
-      - targets:
-          - "APP_SERVER_PRIVATE_IP:9100"
-        labels:
-          instance: app-server
-          service: node-exporter
-    scrape_interval: 15s
 
   # ── Node Exporter — Monitoring Server (self-monitoring) ─────────────────────
   # Monitors the health of the Observations Server itself.

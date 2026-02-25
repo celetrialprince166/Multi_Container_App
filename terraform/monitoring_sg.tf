@@ -82,6 +82,20 @@ resource "aws_vpc_security_group_ingress_rule" "alertmanager_ui" {
   tags = { Name = "monitoring-alertmanager-inbound" }
 }
 
+# Jaeger UI — port 16686
+# Restricted to operator IPs, same as Grafana/Prometheus/Alertmanager.
+resource "aws_vpc_security_group_ingress_rule" "jaeger_ui" {
+  security_group_id = aws_security_group.monitoring.id
+  description       = "Jaeger UI - restricted to operator IP"
+
+  from_port   = 16686
+  to_port     = 16686
+  ip_protocol = "tcp"
+  cidr_ipv4   = join(",", var.allowed_ssh_cidr)
+
+  tags = { Name = "monitoring-jaeger-ui-inbound" }
+}
+
 # SSH — port 22
 resource "aws_vpc_security_group_ingress_rule" "monitoring_ssh" {
   security_group_id = aws_security_group.monitoring.id

@@ -85,6 +85,10 @@ resource "aws_ecs_service" "notes_app" {
     assign_public_ip = true
   }
 
+  service_registries {
+    registry_arn = aws_service_discovery_service.notes_backend.arn
+  }
+
   load_balancer {
     target_group_arn = aws_lb_target_group.notes_app.arn
     container_name   = "proxy"
@@ -105,7 +109,8 @@ resource "aws_ecs_service" "notes_app" {
 
   depends_on = [
     aws_lb_listener.http,
-    aws_ecs_task_definition.notes_app_bootstrap
+    aws_ecs_task_definition.notes_app_bootstrap,
+    aws_service_discovery_service.notes_backend
   ]
 }
 

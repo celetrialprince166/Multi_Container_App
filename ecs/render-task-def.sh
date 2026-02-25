@@ -29,6 +29,7 @@ DB_USERNAME=""
 DB_PASSWORD=""
 DB_NAME=""
 ALB_DNS_NAME=""
+OTEL_EXPORTER_OTLP_ENDPOINT=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -50,6 +51,8 @@ while [[ $# -gt 0 ]]; do
       DB_NAME="$2"; shift 2;;
     --alb-dns-name)
       ALB_DNS_NAME="$2"; shift 2;;
+    --otel-endpoint)
+      OTEL_EXPORTER_OTLP_ENDPOINT="$2"; shift 2;;
     *)
       echo "Unknown argument: $1" >&2
       exit 1;;
@@ -78,6 +81,7 @@ sed \
   -e "s#__DB_PASSWORD__#${DB_PASSWORD}#g" \
   -e "s#__DB_NAME__#${DB_NAME}#g" \
   -e "s#__NEXT_PUBLIC_API_URL__#${NEXT_PUBLIC_API_URL}#g" \
+  -e "s#__OTEL_EXPORTER_OTLP_ENDPOINT__#${OTEL_EXPORTER_OTLP_ENDPOINT}#g" \
   "${TEMPLATE_FILE}" > "${OUTPUT_FILE}"
 
 echo "Rendered task definition written to ${OUTPUT_FILE}"

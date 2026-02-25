@@ -84,3 +84,49 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_alb_to_ecs_tasks_http" {
   }
 }
 
+# =============================================================================
+# Monitoring → ECS Tasks (Prometheus scraping)
+# =============================================================================
+
+# Allow Prometheus (on monitoring server) to scrape the NestJS /metrics endpoint
+# exposed by the backend container running on ECS Fargate. Port 3001 is the
+# backend container port; this rule makes it reachable from the monitoring SG.
+resource "aws_vpc_security_group_ingress_rule" "monitoring_to_ecs_metrics" {
+  security_group_id            = aws_security_group.ecs_tasks.id
+  description                  = "Prometheus scrapes ECS NestJS /metrics (port 3001) from monitoring server"
+  referenced_security_group_id = aws_security_group.monitoring.id
+
+  from_port   = 3001
+  to_port     = 3001
+  ip_protocol = "tcp"
+
+  tags = {
+    Name      = "monitoring-to-ecs-metrics"
+    Direction = "monitoring→ecs-tasks"
+    Purpose   = "prometheus-scrape"
+  }
+}
+
+# =============================================================================
+# ECS Tasks → Monitoring (Jaeger OTLP ingestion)
+# =============================================================================
+
+# Allow ECS tasks to send OTLP HTTP traces to Jaeger running on the
+# monitoring server. Traffic originates from the ecs_tasks SG and hits
+# the monitoring SG on port 4318.
+resource "aws_vpc_security_group_ingress_rule" "jaeger_otlp_from_ecs" {
+  security_group_id            = aws_security_group.monitoring.id
+  description                  = "OTLP trace ingestion from ECS tasks"
+  referenced_security_group_id = aws_security_group.ecs_tasks.id
+
+  from_port   = 4318
+  to_port     = 4318
+  ip_protocol = "tcp"
+
+  tags = {
+    Name      = "monitoring-jaeger-otlp-from-ecs"
+    Direction = "ecs-tasks→monitoring"
+    Purpose   = "otel-traces"
+  }
+}
+

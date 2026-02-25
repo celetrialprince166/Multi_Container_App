@@ -505,7 +505,8 @@ pipeline {
                     string(credentialsId: 'db-name',                     variable: 'DB_NAME'),
                     string(credentialsId: 'ecs-task-execution-role-arn', variable: 'ECS_EXEC_ROLE_ARN'),
                     string(credentialsId: 'ecs-task-role-arn',           variable: 'ECS_TASK_ROLE_ARN'),
-                    string(credentialsId: 'ecs-alb-dns-name',            variable: 'ECS_ALB_DNS_NAME')
+                    string(credentialsId: 'ecs-alb-dns-name',            variable: 'ECS_ALB_DNS_NAME'),
+                    string(credentialsId: 'otel-exporter-otlp-endpoint', variable: 'OTEL_EXPORTER_OTLP_ENDPOINT')
                 ]) {
                     sh '''
                         set -e
@@ -521,7 +522,8 @@ pipeline {
                           --db-username "$DB_USERNAME" \
                           --db-password "$DB_PASSWORD" \
                           --db-name "$DB_NAME" \
-                          --alb-dns-name "$ECS_ALB_DNS_NAME"
+                          --alb-dns-name "$ECS_ALB_DNS_NAME" \
+                          --otel-endpoint "$OTEL_EXPORTER_OTLP_ENDPOINT"
 
                         echo "Registering task definition with ECS..."
                         TASK_DEF_ARN=$(aws ecs register-task-definition \

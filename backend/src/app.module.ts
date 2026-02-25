@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NotesModule } from './notes/notes.module';
 import { MetricsModule } from './metrics.module';
+import { LoggerModule } from './logger/logger.module';
+import { DebugController } from './debug/debug.controller';
 
 // Validate required environment variables
 const requiredEnvVars = ['DB_HOST', 'DB_USERNAME', 'DB_PASSWORD', 'DB_NAME'];
@@ -26,6 +28,7 @@ console.log('Database configuration:', {
 
 @Module({
   imports: [
+    LoggerModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: dbConfig.host,
@@ -48,7 +51,7 @@ console.log('Database configuration:', {
     // Registers GET /metrics + HTTP request counter/histogram interceptor
     MetricsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, DebugController],
   providers: [AppService],
 })
 export class AppModule { }

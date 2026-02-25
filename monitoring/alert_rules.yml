@@ -39,14 +39,15 @@ groups:
             Check: ssh ubuntu@<app-ip> && docker ps && docker logs notes-backend
 
       # ── High HTTP Error Rate ─────────────────────────────────────────────────
-      # Fires when >5% of requests over the last 5 minutes return 5xx status.
+      # Fires when >5% of requests over the last 5 minutes return 5xx status,
+      # sustained for at least 10 minutes (lab requirement).
       #
       # Formula breakdown:
       #   numerator:   rate of 5xx requests per second (averaged over 5m window)
       #   denominator: rate of ALL requests per second (averaged over 5m window)
       #   threshold:   > 0.05 (5%)
       #
-      # "for: 1m" prevents false alarms from a single burst of errors.
+      # "for: 10m" prevents false alarms from short-lived spikes.
       - alert: HighErrorRate
         expr: |
           (
@@ -54,34 +55,35 @@ groups:
             /
             sum(rate(http_requests_total[5m]))
           ) > 0.05
-        for: 1m
+        for: 10m
         labels:
           severity: critical
           team: platform
         annotations:
-          summary: "High HTTP 5xx error rate on Notes API (>5%)"
+          summary: "High HTTP 5xx error rate on Notes API (>5% for 10m)"
           description: >
             Error rate is {{ $value | humanizePercentage }} over the last 5 minutes.
-            Check backend logs: aws logs tail /notes-app/containers --filter-pattern ERROR --region eu-west-1
+            Next steps: inspect Jaeger traces for service notes-backend, then filter CloudWatch logs by trace_id to locate the failing requests.
 
       # ── High P95 Latency ─────────────────────────────────────────────────────
-      # Fires when the 95th percentile request duration exceeds 2 seconds.
+      # Fires when the 95th percentile request duration exceeds 300ms,
+      # sustained for at least 10 minutes (lab requirement).
       # histogram_quantile() requires the _bucket series from the histogram.
-      # "for: 2m" gives time for a slow query to resolve before alerting.
       - alert: HighP95Latency
         expr: |
           histogram_quantile(0.95,
             sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
-          ) > 2
-        for: 2m
+          ) > 0.3
+        for: 10m
         labels:
           severity: warning
           team: platform
         annotations:
-          summary: "High P95 latency on Notes API (>2s)"
+          summary: "High P95 latency on Notes API (>300ms for 10m)"
           description: >
             P95 request duration is {{ $value | humanizeDuration }}.
             Possible causes: slow DB queries, resource exhaustion, or cold starts.
+            Next steps: open Jaeger traces for notes-backend around the alert window and correlate slow spans with CloudWatch logs via trace_id.
 
   # ============================================================================
   # Infrastructure Alerts
