@@ -11,6 +11,7 @@
 # Planning documents, notes, and progress tracking (kept locally)
 docs/
 *.md.local
+!docs/DEPLOYMENT_EVOLUTION.md
 
 # =============================================================================
 # SECRETS & ENVIRONMENT FILES (CRITICAL - NEVER COMMIT)

@@ -16,6 +16,7 @@ A production-ready full-stack Notes application deployed on AWS EC2 using Docker
 - [Jenkins CI/CD Pipeline](#jenkins-cicd-pipeline)
 - [Project Structure](#project-structure)
 - [Observability Stack](#observability-stack)
+- [Deployment Evolution](./docs/DEPLOYMENT_EVOLUTION.md) — *From manual EC2 to Blue/Green ECS*
 - [Learning Outcomes](#learning-outcomes)
 - [Challenges & Solutions](#challenges--solutions)
 - [Future Improvements](#future-improvements)
@@ -27,7 +28,19 @@ A production-ready full-stack Notes application deployed on AWS EC2 using Docker
 
 ## Architecture
 
-The application consists of four containers: Nginx (reverse proxy), Next.js (frontend), NestJS (backend API), and PostgreSQL (database). Traffic flows through Nginx on port 80, which routes requests to the frontend or backend. The backend connects to an isolated PostgreSQL instance. All application images are built in CI, pushed to Amazon ECR, and deployed to a single EC2 instance via SSH. Infrastructure is provisioned with Terraform, and GitHub Actions orchestrates the entire build, test, push, and deploy pipeline.
+The application consists of four containers: Nginx (reverse proxy), Next.js (frontend), NestJS (backend API), and PostgreSQL (database). Traffic flows through Nginx on port 80, which routes requests to the frontend or backend. The backend connects to an isolated PostgreSQL instance.
+
+### Deployment Evolution
+
+This project has evolved through three distinct deployment phases, each representing industry best practices:
+
+1. **Phase 1 — Manual EC2 Deployment**: Initial deployment using Docker Compose on a single EC2 instance via SSH
+2. **Phase 2 — ECS Fargate Migration**: Migration to container orchestration with AWS ECS Fargate for improved scalability and reduced operational overhead
+3. **Phase 3 — Blue/Green Deployment**: Implementation of zero-downtime deployments using AWS CodeDeploy with automatic rollback capabilities
+
+> **See the complete evolution story**: [Deployment Evolution Documentation](./docs/DEPLOYMENT_EVOLUTION.md)
+
+Current production deployment uses **ECS Fargate with Blue/Green deployment strategy**, providing automatic traffic shifting (10% per minute), test listener validation on port 8080, and CloudWatch alarm-triggered rollbacks.
 
 ---
 
@@ -65,6 +78,10 @@ This project was built to master end-to-end DevOps practices for containerized a
 ## Architecture Diagram
 
 ![Multi-Container Notes Application - AWS Architecture](images/arch.png)
+
+### Secure CI/CD ECS Architecture
+
+![Secure CI/CD Pipeline – ECS + SAST/SCA](images/gitops_labarch_diagram.png)
 
 ### Jenkins CI/CD Architecture
 
