@@ -20,12 +20,14 @@ const sdk = new NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
 });
 
-sdk.start().catch((err) => {
+try {
+  sdk.start();
+} catch (err) {
   // Do not crash the app if tracing fails to start; just log the error.
   // The application should remain functional even without tracing.
   // eslint-disable-next-line no-console
   console.error('Failed to start OpenTelemetry SDK:', err);
-});
+}
 
 process.on('SIGTERM', () => {
   sdk
