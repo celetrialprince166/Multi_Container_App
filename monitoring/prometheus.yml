@@ -43,25 +43,21 @@ rule_files:
 # Scrape Targets
 # =============================================================================
 scrape_configs:
-  # ── NestJS Backend /metrics on ECS (Cloud Map DNS) ───────────────────────────
-  # Scrapes the custom application metrics exposed by @willsoto/nestjs-prometheus:
+  # ── NestJS Backend /metrics via ALB ──────────────────────────────────────────
+  # Scrapes the application metrics exposed by @willsoto/nestjs-prometheus:
   #   http_requests_total{method, route, status_code}
   #   http_request_duration_seconds{method, route, status_code}
   # Plus default Node.js runtime metrics (heap, GC, event loop, CPU).
   #
-  # ECS Fargate tasks register into AWS Cloud Map using the private DNS
-  # namespace defined in terraform/service_discovery.tf. We use DNS SD so that
-  # Prometheus automatically discovers task IPs as they scale in/out.
-  #
-  # FQDN pattern:
-  #   <environment>-notes-backend.notes.local
-  # e.g. dev-notes-backend.notes.local
+  # Metrics are exposed at /metrics on the public ALB, which forwards
+  # to the proxy (nginx), which in turn proxies to the NestJS backend.
   - job_name: notes-backend-ecs
-    dns_sd_configs:
-      - names:
-          - "dev-notes-backend.notes.local"
-        type: A
-        port: 3001
+    static_configs:
+      - targets:
+          - "dev-notes-app-alb-229621371.eu-west-1.elb.amazonaws.com:80"
+        labels:
+          instance: ecs-backend
+          service: nestjs-backend
     metrics_path: /metrics
     scrape_interval: 15s
     scrape_timeout: 10s
