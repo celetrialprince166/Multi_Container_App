@@ -572,13 +572,10 @@ pipeline {
                         sed "s|__TASK_DEF_ARN__|$TASK_DEF_ARN|g" \
                           ecs/appspec-template.yaml > ecs/appspec.yaml
 
-                        # Create CodeDeploy deployment with inline AppSpec content
-                        APP_SPEC_B64=$(base64 -w0 ecs/appspec.yaml)
-
                         DEPLOYMENT_ID=$(aws deploy create-deployment \
                           --application-name "$CODEDEPLOY_APP" \
                           --deployment-group-name "$CODEDEPLOY_DG" \
-                          --revision "revisionType=AppSpecContent,appSpecContent={content=$APP_SPEC_B64}" \
+                          --revision "revisionType=AppSpecContent,appSpecContent={content=file://ecs/appspec.yaml}" \
                           --region "$AWS_REGION" \
                           --query 'deploymentId' \
                           --output text)
