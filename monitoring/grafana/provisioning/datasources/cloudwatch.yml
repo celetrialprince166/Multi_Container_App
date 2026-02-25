@@ -19,5 +19,5 @@ datasources:
     jsonData:
       authType: default
       defaultRegion: eu-west-1
-      customMetricsNamespaces: []
+      customMetricsNamespaces: ""
 
