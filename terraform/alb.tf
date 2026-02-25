@@ -62,6 +62,32 @@
    )
  }
 
+resource "aws_lb_target_group" "notes_app_green" {
+  name        = "${var.environment}-notes-app-tg-green"
+  port        = 80
+  protocol    = "HTTP"
+  target_type = "ip" # required for Fargate
+  vpc_id      = data.aws_vpc.default.id
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+    timeout             = 5
+    interval            = 30
+    path                = "/nginx-health"
+    matcher             = "200"
+  }
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-notes-app-tg-green"
+      Role = "ecs-target-group-green"
+    }
+  )
+}
+
  resource "aws_lb_listener" "http" {
    load_balancer_arn = aws_lb.notes_app.arn
    port              = 80
@@ -72,4 +98,16 @@
      target_group_arn = aws_lb_target_group.notes_app.arn
    }
  }
+
+resource "aws_lb_listener" "test" {
+  load_balancer_arn = aws_lb.notes_app.arn
+  port              = 8080
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.notes_app_green.arn
+  }
+}
+
 

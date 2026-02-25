@@ -27,6 +27,8 @@
 //   db-name                → Secret Text
 //   sonarcloud-token       → Secret Text  — SonarCloud user token
 //   slack-token            → Secret Text  — Slack Bot OAuth token
+//   codedeploy-app-name    → Secret Text  — from terraform output codedeploy_app_name
+//   codedeploy-deployment-group → Secret Text — from terraform output codedeploy_deployment_group
 //
 // Required Jenkins Plugins:
 //   Pipeline, Git, Docker Pipeline, AWS Credentials, Amazon ECR,
@@ -542,7 +544,7 @@ pipeline {
         }
 
         // =====================================================================
-        // Stage 10 — Deploy to ECS Service  [main branch only]
+        // Stage 10 — Deploy to ECS Service (CodeDeploy blue/green) [main branch only]
         // =====================================================================
         stage('Deploy to ECS Service') {
             when {
@@ -553,30 +555,38 @@ pipeline {
                 }
             }
             steps {
-                echo '🚀 Updating ECS service with new task definition...'
+                echo '🚀 Deploying to ECS via CodeDeploy (blue/green)...'
                 withCredentials([
-                    string(credentialsId: 'aws-access-key-id',     variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
-                    string(credentialsId: 'aws-region',            variable: 'AWS_REGION'),
-                    string(credentialsId: 'ecs-cluster-name',      variable: 'ECS_CLUSTER'),
-                    string(credentialsId: 'ecs-service-name',      variable: 'ECS_SERVICE')
+                    string(credentialsId: 'aws-access-key-id',           variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key',       variable: 'AWS_SECRET_ACCESS_KEY'),
+                    string(credentialsId: 'aws-region',                  variable: 'AWS_REGION'),
+                    string(credentialsId: 'codedeploy-app-name',         variable: 'CODEDEPLOY_APP'),
+                    string(credentialsId: 'codedeploy-deployment-group', variable: 'CODEDEPLOY_DG')
                 ]) {
                     sh '''
                         set -e
 
                         . ecs/task-def-arn.env
 
-                        aws ecs update-service \
-                          --cluster "$ECS_CLUSTER" \
-                          --service "$ECS_SERVICE" \
-                          --task-definition "$TASK_DEF_ARN" \
-                          --force-new-deployment \
-                          --region "$AWS_REGION"
+                        # Generate AppSpec from template
+                        sed "s|__TASK_DEF_ARN__|$TASK_DEF_ARN|g" \
+                          ecs/appspec-template.yaml > ecs/appspec.yaml
 
-                        echo "Waiting for ECS service to reach steady state..."
-                        aws ecs wait services-stable \
-                          --cluster "$ECS_CLUSTER" \
-                          --services "$ECS_SERVICE" \
+                        # Create CodeDeploy deployment with inline AppSpec content
+                        APP_SPEC_B64=$(base64 -w0 ecs/appspec.yaml)
+
+                        DEPLOYMENT_ID=$(aws deploy create-deployment \
+                          --application-name "$CODEDEPLOY_APP" \
+                          --deployment-group-name "$CODEDEPLOY_DG" \
+                          --revision "revisionType=AppSpecContent,appSpecContent={content=$APP_SPEC_B64}" \
+                          --region "$AWS_REGION" \
+                          --query 'deploymentId' \
+                          --output text)
+
+                        echo "Deployment started: $DEPLOYMENT_ID"
+
+                        aws deploy wait deployment-successful \
+                          --deployment-id "$DEPLOYMENT_ID" \
                           --region "$AWS_REGION"
                     '''
                 }

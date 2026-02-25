@@ -332,3 +332,14 @@ output "ecs_log_groups" {
   }
 }
 
+output "codedeploy_app_name" {
+  description = "Name of the CodeDeploy application for ECS blue/green"
+  value       = aws_codedeploy_app.notes_app.name
+}
+
+output "codedeploy_deployment_group" {
+  description = "Name of the CodeDeploy deployment group for ECS blue/green"
+  value       = aws_codedeploy_deployment_group.notes_app.deployment_group_name
+}
+
+

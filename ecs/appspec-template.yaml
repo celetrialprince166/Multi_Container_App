@@ -1,0 +1,11 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "__TASK_DEF_ARN__"
+        LoadBalancerInfo:
+          ContainerName: "proxy"
+          ContainerPort: 80
+        PlatformVersion: "LATEST"
+

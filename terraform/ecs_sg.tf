@@ -68,6 +68,18 @@
    tags = { Name = "ecs-alb-all-outbound" }
  }
 
+resource "aws_vpc_security_group_ingress_rule" "ecs_alb_test" {
+  security_group_id = aws_security_group.ecs_alb.id
+  description       = "HTTP test listener traffic (8080) from internet to ECS ALB"
+
+  from_port   = 8080
+  to_port     = 8080
+  ip_protocol = "tcp"
+  cidr_ipv4   = "0.0.0.0/0"
+
+  tags = { Name = "ecs-alb-test-http-inbound" }
+}
+
  # ECS tasks — outbound all (pull images, call external APIs, etc.)
  resource "aws_vpc_security_group_egress_rule" "ecs_tasks_all_outbound" {
    security_group_id = aws_security_group.ecs_tasks.id
