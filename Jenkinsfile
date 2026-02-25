@@ -572,15 +572,25 @@ pipeline {
                         sed "s|__TASK_DEF_ARN__|$TASK_DEF_ARN|g" \
                           ecs/appspec-template.yaml > ecs/appspec.yaml
 
-                        # Read AppSpec YAML and JSON-escape it for CodeDeploy AppSpecContent
-                        # (pure-shell: no Python dependency)
-                        APP_SPEC_CONTENT=$(jq -Rs '.' < ecs/appspec.yaml)
+                        # Build a JSON input file for aws deploy create-deployment
+                        # The 'content' field must be the raw YAML string (jq -Rs reads file as single string)
+                        jq -n \
+                          --arg app "$CODEDEPLOY_APP" \
+                          --arg dg "$CODEDEPLOY_DG" \
+                          --rawfile spec ecs/appspec.yaml \
+                          '{
+                            applicationName: $app,
+                            deploymentGroupName: $dg,
+                            revision: {
+                              revisionType: "AppSpecContent",
+                              appSpecContent: {
+                                content: $spec
+                              }
+                            }
+                          }' > ecs/codedeploy-input.json
 
-                        # Create CodeDeploy deployment with inline AppSpec content (no S3 required)
                         DEPLOYMENT_ID=$(aws deploy create-deployment \
-                          --application-name "$CODEDEPLOY_APP" \
-                          --deployment-group-name "$CODEDEPLOY_DG" \
-                          --revision "revisionType=AppSpecContent,appSpecContent={content=$APP_SPEC_CONTENT}" \
+                          --cli-input-json file://ecs/codedeploy-input.json \
                           --region "$AWS_REGION" \
                           --query 'deploymentId' \
                           --output text)
