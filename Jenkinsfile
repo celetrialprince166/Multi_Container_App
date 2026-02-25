@@ -568,14 +568,23 @@ pipeline {
 
                         . ecs/task-def-arn.env
 
-                        # Generate AppSpec from template
+                        # Generate AppSpec from template (YAML)
                         sed "s|__TASK_DEF_ARN__|$TASK_DEF_ARN|g" \
                           ecs/appspec-template.yaml > ecs/appspec.yaml
 
+                        # Read AppSpec YAML and JSON-escape it for CodeDeploy AppSpecContent
+                        APP_SPEC_CONTENT=$(python - <<'PY'
+import json
+with open('ecs/appspec.yaml', 'r', encoding='utf-8') as f:
+    print(json.dumps(f.read()))
+PY
+)
+
+                        # Create CodeDeploy deployment with inline AppSpec content (no S3 required)
                         DEPLOYMENT_ID=$(aws deploy create-deployment \
                           --application-name "$CODEDEPLOY_APP" \
                           --deployment-group-name "$CODEDEPLOY_DG" \
-                          --revision "revisionType=AppSpecContent,appSpecContent={content=file://ecs/appspec.yaml}" \
+                          --revision "revisionType=AppSpecContent,appSpecContent={content=$APP_SPEC_CONTENT}" \
                           --region "$AWS_REGION" \
                           --query 'deploymentId' \
                           --output text)
