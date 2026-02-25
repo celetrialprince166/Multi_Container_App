@@ -573,12 +573,8 @@ pipeline {
                           ecs/appspec-template.yaml > ecs/appspec.yaml
 
                         # Read AppSpec YAML and JSON-escape it for CodeDeploy AppSpecContent
-                        APP_SPEC_CONTENT=$(python - <<'PY'
-import json
-with open('ecs/appspec.yaml', 'r', encoding='utf-8') as f:
-    print(json.dumps(f.read()))
-PY
-)
+                        # (pure-shell: no Python dependency)
+                        APP_SPEC_CONTENT=$(jq -Rs '.' < ecs/appspec.yaml)
 
                         # Create CodeDeploy deployment with inline AppSpec content (no S3 required)
                         DEPLOYMENT_ID=$(aws deploy create-deployment \
