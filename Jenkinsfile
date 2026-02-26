@@ -78,7 +78,7 @@ pipeline {
         // =====================================================================
         stage('Checkout') {
             steps {
-                echo '📥 Checking out source code...'
+                echo ' Checking out source code...'
                 checkout scm
                 script {
                     env.GIT_COMMIT_SHORT = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
@@ -103,7 +103,7 @@ pipeline {
                 stage('Backend — TypeScript Check') {
                     steps {
                         dir('backend') {
-                            echo '🔍 Running TypeScript compiler check (backend)...'
+                            echo ' Running TypeScript compiler check (backend)...'
                             sh 'npm install'
                             // Type-check without emitting output
                             sh 'npx tsc --noEmit'
@@ -114,7 +114,7 @@ pipeline {
                 stage('Frontend — Lint') {
                     steps {
                         dir('frontend') {
-                            echo '🔍 Running Next.js lint (frontend)...'
+                            echo ' Running Next.js lint (frontend)...'
                             sh 'npm install'
                             // next lint exits 0 even with warnings by default
                             sh 'npm run lint || true'
@@ -134,7 +134,7 @@ pipeline {
                 stage('Backend — npm audit') {
                     steps {
                         dir('backend') {
-                            echo '🔒 Running npm audit (backend)...'
+                            echo ' Running npm audit (backend)...'
                             sh '''
                                 npm audit --audit-level=high \
                                     --json > npm-audit-backend.json || true
@@ -153,7 +153,7 @@ pipeline {
                 stage('Frontend — npm audit') {
                     steps {
                         dir('frontend') {
-                            echo '🔒 Running npm audit (frontend)...'
+                            echo ' Running npm audit (frontend)...'
                             sh '''
                                 npm audit --audit-level=high \
                                     --json > npm-audit-frontend.json || true
@@ -177,7 +177,7 @@ pipeline {
         // =====================================================================
         stage('Unit Tests & Coverage') {
             steps {
-                echo '⏭️  Skipping tests — no test scripts configured in package.json yet.'
+                echo ' Skipping tests — no test scripts configured in package.json yet.'
                 echo 'To enable: add Jest + test scripts to backend/frontend package.json'
             }
         }
@@ -187,7 +187,7 @@ pipeline {
         // =====================================================================
         stage('SonarCloud Analysis') {
             steps {
-                echo '📊 Running SonarCloud analysis...'
+                echo ' Running SonarCloud analysis...'
                 script {
                     try {
                         withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
@@ -206,7 +206,7 @@ pipeline {
                             }
                         }
                     } catch (Exception e) {
-                        echo "⚠️ SonarCloud analysis skipped: ${e.message}"
+                        echo " SonarCloud analysis skipped: ${e.message}"
                         echo 'To enable: add sonarcloud-token credential in Jenkins'
                     }
                 }
@@ -215,14 +215,14 @@ pipeline {
 
         stage('SonarCloud Quality Gate') {
             steps {
-                echo '🚦 Waiting for SonarCloud Quality Gate result...'
+                echo ' Waiting for SonarCloud Quality Gate result...'
                 script {
                     try {
                         timeout(time: 5, unit: 'MINUTES') {
                             waitForQualityGate abortPipeline: true
                         }
                     } catch (Exception e) {
-                        echo "⚠️ Quality Gate check skipped: ${e.message}"
+                        echo " Quality Gate check skipped: ${e.message}"
                     }
                 }
             }
@@ -233,7 +233,7 @@ pipeline {
         // =====================================================================
         stage('Docker Build') {
             steps {
-                echo "🐳 Building Docker images (tag: ${env.IMAGE_TAG})..."
+                echo "Building Docker images (tag: ${env.IMAGE_TAG})..."
                 withCredentials([string(credentialsId: 'ecr-registry', variable: 'ECR_REGISTRY')]) {
                     sh """
                         docker build \
@@ -269,7 +269,7 @@ pipeline {
         // =====================================================================
         stage('Image Vulnerability Scan') {
             steps {
-                echo '🛡️  Scanning Docker images with Trivy...'
+                echo '  Scanning Docker images with Trivy...'
                 withCredentials([string(credentialsId: 'ecr-registry', variable: 'ECR_REGISTRY')]) {
                     script {
                         // Install Trivy to user-writable location
@@ -323,7 +323,7 @@ pipeline {
                 }
             }
             steps {
-                echo '📤 Pushing images to Amazon ECR...'
+                echo ' Pushing images to Amazon ECR...'
                 withCredentials([
                     string(credentialsId: 'aws-access-key-id',     variable: 'AWS_ACCESS_KEY_ID'),
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
@@ -362,7 +362,7 @@ pipeline {
                 }
             }
             steps {
-                echo '🚀 Deploying to EC2...'
+                echo ' Deploying to EC2...'
                 withCredentials([
                     string(credentialsId: 'aws-access-key-id',     variable: 'AWS_ACCESS_KEY_ID'),
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
@@ -395,14 +395,14 @@ NEXT_PUBLIC_API_URL=http://${EC2_HOST}/api
 EOF
 
                         # Copy files to EC2
-                        echo "📂 Copying files to ${EC2_HOST}..."
+                        echo " Copying files to ${EC2_HOST}..."
                         scp -v -o StrictHostKeyChecking=no \
                             -i "\${SSH_KEY}" \
                             .env docker-compose.ecr.yml \
                             \${SSH_USER}@${EC2_HOST}:/opt/notes-app/
 
                         # Remote deploy commands
-                        echo "🚀 executing remote commands on ${EC2_HOST}..."
+                        echo " executing remote commands on ${EC2_HOST}..."
                         ssh -v -o StrictHostKeyChecking=no \
                             -i "\${SSH_KEY}" \
                             \${SSH_USER}@${EC2_HOST} bash -s <<'REMOTE'
@@ -428,7 +428,7 @@ EOF
                             # Clean up dangling images
                             docker image prune -f
 
-                            echo "✅ Deployment complete"
+                            echo " Deployment complete"
                             docker compose -f docker-compose.ecr.yml ps
 REMOTE
                     """
@@ -463,7 +463,7 @@ REMOTE
                             echo "Attempt \$i — HTTP \$HTTP_CODE"
 
                             if echo "200 301 302" | grep -qw "\$HTTP_CODE"; then
-                                echo "✅ Smoke test passed (HTTP \$HTTP_CODE)"
+                                echo " Smoke test passed (HTTP \$HTTP_CODE)"
                                 exit 0
                             fi
 
@@ -473,7 +473,7 @@ REMOTE
                             fi
                         done
 
-                        echo "❌ Smoke test failed after \$MAX_RETRIES attempts"
+                        echo " Smoke test failed after \$MAX_RETRIES attempts"
                         exit 1
                     """
                 }
@@ -488,33 +488,33 @@ REMOTE
     post {
 
         success {
-            echo '✅ Pipeline succeeded!'
+            echo ' Pipeline succeeded!'
             script {
                 try {
                     slackSend(
                         channel: env.SLACK_CHANNEL,
                         color: 'good',
                         tokenCredentialId: 'slack-token',
-                        message: "✅ *Build Succeeded* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Commit:* `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}\n*Message:* ${env.GIT_MESSAGE}\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
+                        message: " *Build Succeeded* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Commit:* `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}\n*Message:* ${env.GIT_MESSAGE}\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
                     )
                 } catch (Exception e) {
-                    echo "⚠️ Slack notification failed: ${e.message}"
+                    echo " Slack notification failed: ${e.message}"
                 }
             }
         }
 
         failure {
-            echo '❌ Pipeline failed!'
+            echo ' Pipeline failed!'
             script {
                 try {
                     slackSend(
                         channel: env.SLACK_CHANNEL,
                         color: 'danger',
                         tokenCredentialId: 'slack-token',
-                        message: "❌ *Build Failed* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Commit:* `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}\n*Message:* ${env.GIT_MESSAGE}\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
+                        message: " *Build Failed* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Commit:* `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}\n*Message:* ${env.GIT_MESSAGE}\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
                     )
                 } catch (Exception e) {
-                    echo "⚠️ Slack notification failed: ${e.message}"
+                    echo " Slack notification failed: ${e.message}"
                 }
             }
         }
@@ -526,16 +526,16 @@ REMOTE
                         channel: env.SLACK_CHANNEL,
                         color: 'warning',
                         tokenCredentialId: 'slack-token',
-                        message: "⚠️ *Build Unstable* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
+                        message: " *Build Unstable* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
                     )
                 } catch (Exception e) {
-                    echo "⚠️ Slack notification failed: ${e.message}"
+                    echo " Slack notification failed: ${e.message}"
                 }
             }
         }
 
         always {
-            echo '🧹 Cleaning up workspace...'
+            echo ' Cleaning up workspace...'
             // Docker cleanup — uses image names only, no credential dependency
             sh """
                 docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'notes-(backend|frontend|proxy)' | xargs -r docker rmi -f || true
