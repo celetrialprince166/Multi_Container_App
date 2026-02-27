@@ -102,7 +102,7 @@ pipeline {
         // =====================================================================
         stage('Secret Scan — Gitleaks') {
             steps {
-                echo '🔐 Running Gitleaks secret scan...'
+                echo ' Running Gitleaks secret scan...'
                 script {
                     sh '''
                         set -e
@@ -155,7 +155,7 @@ pipeline {
                 stage('Backend — TypeScript Check') {
                     steps {
                         dir('backend') {
-                            echo '🔍 Running TypeScript compiler check (backend)...'
+                            echo ' Running TypeScript compiler check (backend)...'
                             sh 'npm install'
                             // Type-check without emitting output
                             sh 'npx tsc --noEmit'
@@ -166,7 +166,7 @@ pipeline {
                 stage('Frontend — Lint') {
                     steps {
                         dir('frontend') {
-                            echo '🔍 Running Next.js lint (frontend)...'
+                            echo ' Running Next.js lint (frontend)...'
                             sh 'npm install'
                             // next lint exits 0 even with warnings by default
                             sh 'npm run lint || true'
@@ -186,7 +186,7 @@ pipeline {
                 stage('Backend — npm audit') {
                     steps {
                         dir('backend') {
-                            echo '🔒 Running npm audit (backend)...'
+                            echo ' Running npm audit (backend)...'
                             sh '''
                                 set +e
                                 npm audit --audit-level=high --json > npm-audit-backend.json
@@ -213,7 +213,7 @@ pipeline {
                 stage('Frontend — npm audit') {
                     steps {
                         dir('frontend') {
-                            echo '🔒 Running npm audit (frontend)...'
+                            echo ' Running npm audit (frontend)...'
                             sh '''
                                 set +e
                                 npm audit --audit-level=high --json > npm-audit-frontend.json
@@ -245,7 +245,7 @@ pipeline {
         // =====================================================================
         stage('Unit Tests & Coverage') {
             steps {
-                echo '⏭️  Skipping tests — no test scripts configured in package.json yet.'
+                echo '  Skipping tests — no test scripts configured in package.json yet.'
                 echo 'To enable: add Jest + test scripts to backend/frontend package.json'
             }
         }
@@ -256,7 +256,7 @@ pipeline {
         // =====================================================================
         stage('SonarCloud Analysis') {
             steps {
-                echo '📊 Running SonarCloud analysis...'
+                echo ' Running SonarCloud analysis...'
                 script {
                     withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
                         withSonarQubeEnv('SonarCloud') {
@@ -279,7 +279,7 @@ pipeline {
 
         stage('SonarCloud Quality Gate') {
             steps {
-                echo '🚦 Waiting for SonarCloud Quality Gate result...'
+                echo ' Waiting for SonarCloud Quality Gate result...'
                 script {
                     timeout(time: 5, unit: 'MINUTES') {
                         waitForQualityGate abortPipeline: false
@@ -293,7 +293,7 @@ pipeline {
         // =====================================================================
         stage('Docker Build') {
             steps {
-                echo "🐳 Building Docker images (tag: ${env.IMAGE_TAG})..."
+                echo " Building Docker images (tag: ${env.IMAGE_TAG})..."
                 withCredentials([string(credentialsId: 'ecr-registry', variable: 'ECR_REGISTRY')]) {
                     sh """
                         docker build \
@@ -329,7 +329,7 @@ pipeline {
         // =====================================================================
         stage('Image Vulnerability Scan') {
             steps {
-                echo '🛡️  Scanning Docker images with Trivy...'
+                echo '  Scanning Docker images with Trivy...'
                 withCredentials([string(credentialsId: 'ecr-registry', variable: 'ECR_REGISTRY')]) {
                     script {
                         // Install Trivy to user-writable location
@@ -386,7 +386,7 @@ pipeline {
         // =====================================================================
         stage('SBOM Generation — Syft') {
             steps {
-                echo '📦 Generating SBOMs with Syft...'
+                echo ' Generating SBOMs with Syft...'
                 withCredentials([string(credentialsId: 'ecr-registry', variable: 'ECR_REGISTRY')]) {
                     script {
                         sh '''
@@ -434,7 +434,7 @@ pipeline {
         // =====================================================================
         stage('Security Gate Summary') {
             steps {
-                echo '✅ All security gates passed for this build:'
+                echo ' All security gates passed for this build:'
                 echo '   - Gitleaks secret scan'
                 echo '   - npm audit (backend & frontend)'
                 echo '   - SonarCloud analysis + quality gate'
@@ -455,7 +455,7 @@ pipeline {
                 }
             }
             steps {
-                echo '📤 Pushing images to Amazon ECR...'
+                echo ' Pushing images to Amazon ECR...'
                 withCredentials([
                     string(credentialsId: 'aws-access-key-id',     variable: 'AWS_ACCESS_KEY_ID'),
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
@@ -494,7 +494,7 @@ pipeline {
                 }
             }
             steps {
-                echo '📄 Rendering ECS task definition and registering new revision...'
+                echo ' Rendering ECS task definition and registering new revision...'
                 withCredentials([
                     string(credentialsId: 'aws-access-key-id',           variable: 'AWS_ACCESS_KEY_ID'),
                     string(credentialsId: 'aws-secret-access-key',       variable: 'AWS_SECRET_ACCESS_KEY'),
@@ -557,7 +557,7 @@ pipeline {
                 }
             }
             steps {
-                echo '🚀 Deploying to ECS via CodeDeploy (blue/green)...'
+                echo 'Deploying to ECS via CodeDeploy (blue/green)...'
                 withCredentials([
                     string(credentialsId: 'aws-access-key-id',           variable: 'AWS_ACCESS_KEY_ID'),
                     string(credentialsId: 'aws-secret-access-key',       variable: 'AWS_SECRET_ACCESS_KEY'),
@@ -634,7 +634,7 @@ pipeline {
                             echo "Attempt $i — HTTP $HTTP_CODE"
 
                             if echo "200 301 302" | grep -qw "$HTTP_CODE"; then
-                                echo "✅ ECS smoke test passed (HTTP $HTTP_CODE)"
+                                echo " ECS smoke test passed (HTTP $HTTP_CODE)"
                                 exit 0
                             fi
 
@@ -644,7 +644,7 @@ pipeline {
                             fi
                         done
 
-                        echo "❌ ECS smoke test failed after $MAX_RETRIES attempts"
+                        echo " ECS smoke test failed after $MAX_RETRIES attempts"
                         exit 1
                     '''
                 }
@@ -659,14 +659,14 @@ pipeline {
     post {
 
         success {
-            echo '✅ Pipeline succeeded!'
+            echo ' Pipeline succeeded!'
             script {
                 try {
                     slackSend(
                         channel: env.SLACK_CHANNEL,
                         color: 'good',
                         tokenCredentialId: 'slack-token',
-                        message: "✅ *Build Succeeded* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Commit:* `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}\n*Message:* ${env.GIT_MESSAGE}\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
+                        message: " *Build Succeeded* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Commit:* `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}\n*Message:* ${env.GIT_MESSAGE}\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
                     )
                 } catch (Exception e) {
                     echo "⚠️ Slack notification failed: ${e.message}"
@@ -685,7 +685,7 @@ pipeline {
                         message: "❌ *Build Failed* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Commit:* `${env.GIT_COMMIT_SHORT}` by ${env.GIT_AUTHOR}\n*Message:* ${env.GIT_MESSAGE}\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
                     )
                 } catch (Exception e) {
-                    echo "⚠️ Slack notification failed: ${e.message}"
+                    echo " Slack notification failed: ${e.message}"
                 }
             }
         }
@@ -697,16 +697,16 @@ pipeline {
                         channel: env.SLACK_CHANNEL,
                         color: 'warning',
                         tokenCredentialId: 'slack-token',
-                        message: "⚠️ *Build Unstable* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
+                        message: " *Build Unstable* — Notes App\n*Branch:* `${env.BRANCH_NAME}`\n*Build:* <${env.BUILD_URL}|#${env.BUILD_NUMBER}>"
                     )
                 } catch (Exception e) {
-                    echo "⚠️ Slack notification failed: ${e.message}"
+                    echo " Slack notification failed: ${e.message}"
                 }
             }
         }
 
         always {
-            echo '🧹 Cleaning up workspace...'
+            echo ' Cleaning up workspace...'
             // Docker cleanup — uses image names only, no credential dependency
             sh """
                 docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'notes-(backend|frontend|proxy)' | xargs -r docker rmi -f || true
